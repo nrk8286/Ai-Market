@@ -1,0 +1,9 @@
+
+name = "ultimate-ai-seo-worker"
+type = "javascript"
+account_id = "b614a334d81a99630c1b32f074e44a9e"
+workers_dev = true
+compatibility_date = "2025-01-15"
+
+[vars]
+SITE_TITLE = "Ultimate AI SEO Website"
