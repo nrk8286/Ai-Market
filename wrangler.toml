@@ -1,3 +1,8 @@
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+data-cf-beacon='{"token": "f598890e674741e49ac2a848c1f338a2"}'>
+</script>
+<!-- End Cloudflare Web Analytics -->
 
 name = "ultimate-ai-seo-worker"
 type = "javascript"
