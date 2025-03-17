@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  dify-api:
+    image: langgenius/dify-api
+    environment:
+      - ENV_VAR1=value1
+      - ENV_VAR2=value2
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data:/data
