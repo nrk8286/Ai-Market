@@ -4,11 +4,18 @@ data-cf-beacon='{"token": "f598890e674741e49ac2a848c1f338a2"}'>
 </script>
 <!-- End Cloudflare Web Analytics -->
 
-name = "ultimate-ai-seo-worker"
+name = "ai-marketplace"
 type = "javascript"
 account_id = "b614a334d81a99630c1b32f074e44a9e"
 workers_dev = true
 compatibility_date = "2025-01-15"
 
 [vars]
-SITE_TITLE = "Ultimate AI SEO Website"
+SITE_TITLE = "AI Marketplace"
+OPENAI_API_KEY = "your_openai_api_key"
+PAYMENT_GATEWAY_API_KEY = "your_payment_gateway_api_key"
+
+[env.production]
+name = "ai-marketplace-production"
+route = "searchenginepro.uk/*"
+zone_id = "your_zone_id"

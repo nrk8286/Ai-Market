@@ -35,4 +35,37 @@ jobs:
         app_key: ${{secrets.DD_APP_KEY}}
         test_search_query: 'tag:e2e-tests' #Modify this tag to suit your tagging strategy
 
+    - name: Test AI Marketplace Home Page
+      run: |
+        curl -f -s -o /dev/null https://searchenginepro.uk
+        echo "Home page is accessible"
 
+    - name: Test AI Marketplace Items API
+      run: |
+        curl -f -s -o /dev/null https://searchenginepro.uk/marketplace/items
+        echo "Marketplace items API is accessible"
+
+    - name: Test AI Marketplace Buy API
+      run: |
+        curl -f -s -o /dev/null https://searchenginepro.uk/marketplace/buy
+        echo "Marketplace buy API is accessible"
+
+    - name: Test AI Marketplace User Registration
+      run: |
+        curl -f -s -o /dev/null https://searchenginepro.uk/api/register
+        echo "User registration API is accessible"
+
+    - name: Test AI Marketplace User Login
+      run: |
+        curl -f -s -o /dev/null https://searchenginepro.uk/api/login
+        echo "User login API is accessible"
+
+    - name: Test AI Marketplace User Dashboard
+      run: |
+        curl -f -s -o /dev/null https://searchenginepro.uk/dashboard
+        echo "User dashboard is accessible"
+
+    - name: Test AI Marketplace Upload Flow
+      run: |
+        curl -f -s -o /dev/null https://searchenginepro.uk/upload
+        echo "Upload flow is accessible"

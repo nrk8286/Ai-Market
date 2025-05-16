@@ -27,6 +27,34 @@ export default {
             });
         }
 
+        if (url.pathname.startsWith("/marketplace/items")) {
+            let items = await getMarketplaceItems();
+            return new Response(items, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
+        if (url.pathname.startsWith("/marketplace/buy")) {
+            let result = await processPayment(env.PAYMENT_GATEWAY_API_KEY, request);
+            return new Response(result, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
+        if (url.pathname.startsWith("/api/fix-errors")) {
+            let result = await fixErrors(env.OPENAI_API_KEY);
+            return new Response(result, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
+        if (url.pathname.startsWith("/api/customer-support")) {
+            let result = await handleCustomerSupport(env.OPENAI_API_KEY, request);
+            return new Response(result, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         return new Response("404 Not Found", { status: 404 });
     }
 };
@@ -38,9 +66,9 @@ function generateHomePage() {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ultimate AI-Powered SEO Site</title>
-        <meta name="description" content="AI-powered content for high-ranking SEO optimization.">
-        <meta name="keywords" content="AI, SEO, Cloudflare, automation, high traffic, self-learning AI">
+        <title>AI Marketplace</title>
+        <meta name="description" content="AI-powered marketplace for innovative tools and services.">
+        <meta name="keywords" content="AI, marketplace, tools, services, innovation">
         <meta name="robots" content="index, follow">
         <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
@@ -49,11 +77,11 @@ function generateHomePage() {
         </style>
     </head>
     <body>
-        <h1>Welcome to the Future of AI-Powered Websites</h1>
+        <h1>Welcome to the AI Marketplace</h1>
         <div class="content">
-            <p>This AI-powered website continuously improves itself.</p>
-            <p>Click below to generate dynamic SEO-rich content:</p>
-            <a href="/api/generate">Generate AI Content</a>
+            <p>Discover and purchase AI-powered tools and services.</p>
+            <p>Click below to explore our marketplace:</p>
+            <a href="/marketplace/items">View Marketplace Items</a>
             <p><a href="/about">About Us</a> | <a href="/contact">Contact Us</a></p>
         </div>
     </body>
@@ -69,6 +97,9 @@ function generateAboutPage() {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>About Us</title>
+        <meta name="description" content="Learn more about our AI-powered marketplace and team.">
+        <meta name="keywords" content="AI, marketplace, About Us, Team, AI-powered tools">
+        <meta name="robots" content="index, follow">
         <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
             h1 { color: #0078D7; }
@@ -78,7 +109,7 @@ function generateAboutPage() {
     <body>
         <h1>About Us</h1>
         <div class="content">
-            <p>We are a team of AI enthusiasts dedicated to creating the best AI-powered SEO tools.</p>
+            <p>We are a team of AI enthusiasts dedicated to creating the best AI-powered marketplace.</p>
             <a href="/">Back to Home</a>
         </div>
     </body>
@@ -94,6 +125,9 @@ function generateContactPage() {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Contact Us</title>
+        <meta name="description" content="Get in touch with us for any queries or support.">
+        <meta name="keywords" content="AI, marketplace, Contact, Support, Queries">
+        <meta name="robots" content="index, follow">
         <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
             h1 { color: #0078D7; }
@@ -124,4 +158,42 @@ async function generateAIContent(apiKey) {
         <a href="/">Back to Home</a>
     </body></html>
     `;
+}
+
+async function getMarketplaceItems() {
+    const items = [
+        { id: 1, name: "AI Content Generator", price: 100 },
+        { id: 2, name: "SEO Optimization Tool", price: 200 },
+    ];
+    return JSON.stringify(items);
+}
+
+async function processPayment(apiKey, request) {
+    if (!apiKey) {
+        return JSON.stringify({ error: "Payment Gateway API Key Missing" });
+    }
+
+    // Simulate payment processing
+    const paymentResult = { success: true, message: "Payment processed successfully" };
+    return JSON.stringify(paymentResult);
+}
+
+async function fixErrors(apiKey) {
+    if (!apiKey) {
+        return JSON.stringify({ error: "API Key Missing" });
+    }
+
+    // Simulate AI error fixing
+    const fixResult = { success: true, message: "Errors fixed successfully" };
+    return JSON.stringify(fixResult);
+}
+
+async function handleCustomerSupport(apiKey, request) {
+    if (!apiKey) {
+        return JSON.stringify({ error: "API Key Missing" });
+    }
+
+    // Simulate AI customer support
+    const supportResult = { success: true, message: "Customer support handled successfully" };
+    return JSON.stringify(supportResult);
 }
