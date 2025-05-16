@@ -1,10 +1,21 @@
-
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
         
         if (url.pathname === "/") {
             return new Response(generateHomePage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/about") {
+            return new Response(generateAboutPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/contact") {
+            return new Response(generateContactPage(), {
                 headers: { "Content-Type": "text/html" },
             });
         }
@@ -43,6 +54,57 @@ function generateHomePage() {
             <p>This AI-powered website continuously improves itself.</p>
             <p>Click below to generate dynamic SEO-rich content:</p>
             <a href="/api/generate">Generate AI Content</a>
+            <p><a href="/about">About Us</a> | <a href="/contact">Contact Us</a></p>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateAboutPage() {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>About Us</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+            h1 { color: #0078D7; }
+            .content { margin: auto; width: 80%; text-align: left; }
+        </style>
+    </head>
+    <body>
+        <h1>About Us</h1>
+        <div class="content">
+            <p>We are a team of AI enthusiasts dedicated to creating the best AI-powered SEO tools.</p>
+            <a href="/">Back to Home</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateContactPage() {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contact Us</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+            h1 { color: #0078D7; }
+            .content { margin: auto; width: 80%; text-align: left; }
+        </style>
+    </head>
+    <body>
+        <h1>Contact Us</h1>
+        <div class="content">
+            <p>If you have any questions, feel free to reach out to us at contact@ai-market.com.</p>
+            <a href="/">Back to Home</a>
         </div>
     </body>
     </html>
