@@ -9,6 +9,9 @@ Welcome to the AI Marketplace repository! This project is an AI-powered marketpl
 - [Deploying to Cloudflare](#deploying-to-cloudflare)
 - [Integrating AI](#integrating-ai)
 - [Adding Graphics](#adding-graphics)
+- [Usage Examples](#usage-examples)
+- [Troubleshooting](#troubleshooting)
+- [Environment Variables](#environment-variables)
 - [License](#license)
 - [Contributing](#contributing)
 
@@ -86,6 +89,44 @@ To make the site visually appealing and similar to popular e-commerce platforms 
 
 2. **Update HTML and CSS:**
    Modify the `index.html` and `styles.css` files to include the new graphics and improve the site's design.
+
+## Usage Examples
+
+Here are some examples of how to use the AI Marketplace:
+
+1. **Explore Marketplace:**
+   Visit the homepage and click on the "Explore Marketplace" button to view available AI-powered tools and services.
+
+2. **Purchase an Item:**
+   Select an item from the marketplace and click the "Buy" button to proceed with the purchase.
+
+3. **AI-Generated Content:**
+   Access the AI-generated content by visiting the `/api/generate` route.
+
+## Troubleshooting
+
+If you encounter any issues while using the AI Marketplace, consider the following troubleshooting tips:
+
+1. **Check Environment Variables:**
+   Ensure that all required environment variables are set correctly in the `.env` file.
+
+2. **Review Logs:**
+   Check the server logs for any error messages or warnings that may provide insights into the issue.
+
+3. **Update Dependencies:**
+   Ensure that all dependencies are up to date by running `npm update`.
+
+4. **Clear Cache:**
+   Clear your browser cache and cookies to resolve any caching-related issues.
+
+## Environment Variables
+
+The following environment variables are used in the AI Marketplace project:
+
+- `OPENAI_API_KEY`: The API key for accessing OpenAI services.
+- `PAYMENT_GATEWAY_API_KEY`: The API key for the payment gateway used for processing transactions.
+
+Ensure that these environment variables are set correctly in the `.env` file before running the project.
 
 ## License
 

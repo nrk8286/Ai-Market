@@ -1,14 +1,27 @@
+/* CSS Variables for colors, fonts, and other design elements */
+:root {
+    --primary-color: #0078D7;
+    --secondary-color: #005bb5;
+    --background-color: #f4f4f4;
+    --text-color: #333;
+    --font-family: 'Arial', sans-serif;
+    --btn-background-color: #0078D7;
+    --btn-hover-background-color: #005bb5;
+    --btn-text-color: white;
+}
+
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: var(--font-family);
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 header {
-    background-color: #0078D7;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--btn-text-color);
     padding: 10px 0;
     text-align: center;
 }
@@ -28,7 +41,7 @@ nav ul li {
 }
 
 nav ul li a {
-    color: white;
+    color: var(--btn-text-color);
     text-decoration: none;
 }
 
@@ -43,7 +56,7 @@ main {
 section#intro {
     text-align: center;
     padding: 20px;
-    background-color: white;
+    background-color: var(--btn-text-color);
     margin-bottom: 20px;
 }
 
@@ -54,18 +67,19 @@ section#intro h2 {
 section#intro .btn {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #0078D7;
-    color: white;
+    background-color: var(--btn-background-color);
+    color: var(--btn-text-color);
     text-decoration: none;
     border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 section#intro .btn:hover {
-    background-color: #005bb5;
+    background-color: var(--btn-hover-background-color);
 }
 
 section#features {
-    background-color: white;
+    background-color: var(--btn-text-color);
     padding: 20px;
 }
 
@@ -82,8 +96,126 @@ section#features ul li {
 }
 
 footer {
-    background-color: #0078D7;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--btn-text-color);
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header, footer {
+        text-align: center;
+    }
+
+    nav ul li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    main {
+        padding: 10px;
+    }
+}
+
+/* Animations and Transitions */
+.btn {
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--btn-hover-background-color);
+}
+
+/* Organize CSS by grouping related styles and adding comments */
+/* Header Styles */
+header {
+    background-color: var(--primary-color);
+    color: var(--btn-text-color);
+    padding: 10px 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+/* Navigation Styles */
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 10px;
+}
+
+nav ul li a {
+    color: var(--btn-text-color);
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Main Content Styles */
+main {
+    padding: 20px;
+}
+
+/* Intro Section Styles */
+section#intro {
+    text-align: center;
+    padding: 20px;
+    background-color: var(--btn-text-color);
+    margin-bottom: 20px;
+}
+
+section#intro h2 {
+    margin-top: 0;
+}
+
+section#intro .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--btn-background-color);
+    color: var(--btn-text-color);
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+section#intro .btn:hover {
+    background-color: var(--btn-hover-background-color);
+}
+
+/* Features Section Styles */
+section#features {
+    background-color: var(--btn-text-color);
+    padding: 20px;
+}
+
+section#features ul {
+    list-style: none;
+    padding: 0;
+}
+
+section#features ul li {
+    background-color: #e7e7e7;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Footer Styles */
+footer {
+    background-color: var(--primary-color);
+    color: var(--btn-text-color);
     text-align: center;
     padding: 10px 0;
     position: fixed;

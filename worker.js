@@ -69,7 +69,6 @@ function generateHomePage() {
         <title>AI Marketplace</title>
         <meta name="description" content="AI-powered marketplace for innovative tools and services.">
         <meta name="keywords" content="AI, marketplace, tools, services, innovation">
-        <meta name="robots" content="index, follow">
         <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
             h1 { color: #0078D7; }
@@ -99,7 +98,6 @@ function generateAboutPage() {
         <title>About Us</title>
         <meta name="description" content="Learn more about our AI-powered marketplace and team.">
         <meta name="keywords" content="AI, marketplace, About Us, Team, AI-powered tools">
-        <meta name="robots" content="index, follow">
         <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
             h1 { color: #0078D7; }
@@ -127,7 +125,6 @@ function generateContactPage() {
         <title>Contact Us</title>
         <meta name="description" content="Get in touch with us for any queries or support.">
         <meta name="keywords" content="AI, marketplace, Contact, Support, Queries">
-        <meta name="robots" content="index, follow">
         <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
             h1 { color: #0078D7; }
