@@ -5,7 +5,7 @@
   "main": "worker.js",
   "scripts": {
     "start": "wrangler dev",
-    "deploy": "wrangler publish",
+    "deploy": "wrangler deploy",
     "test": "jest"
   },
   "dependencies": {

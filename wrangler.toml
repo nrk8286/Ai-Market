@@ -1,11 +1,5 @@
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
-data-cf-beacon='{"token": "f598890e674741e49ac2a848c1f338a2"}'>
-</script>
-<!-- End Cloudflare Web Analytics -->
-
 name = "ai-marketplace"
-type = "javascript"
+main = "worker.js"
 account_id = "b614a334d81a99630c1b32f074e44a9e"
 workers_dev = true
 compatibility_date = "2025-01-15"
