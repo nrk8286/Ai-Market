@@ -20,6 +20,24 @@ export default {
             });
         }
 
+        // Elite AI Prompt Autonomous Agent Endpoints
+        if (url.pathname.startsWith("/api/autonomous-agent")) {
+            return handleAutonomousAgent(request, env);
+        }
+
+        if (url.pathname.startsWith("/api/niche-discovery")) {
+            return handleNicheDiscovery(request, env);
+        }
+
+        if (url.pathname.startsWith("/api/keyword-research")) {
+            return handleKeywordResearch(request, env);
+        }
+
+        if (url.pathname.startsWith("/api/tech-stack")) {
+            return handleTechStack(request, env);
+        }
+
+        // Original endpoints
         if (url.pathname.startsWith("/api/generate")) {
             let content = await generateAIContent(env.OPENAI_API_KEY);
             return new Response(content, {
@@ -193,4 +211,148 @@ async function handleCustomerSupport(apiKey, request) {
     // Simulate AI customer support
     const supportResult = { success: true, message: "Customer support handled successfully" };
     return JSON.stringify(supportResult);
+}
+
+// Elite AI Prompt System Handlers
+async function handleAutonomousAgent(request, env) {
+    try {
+        if (request.method === 'POST') {
+            const userInput = await request.json();
+            
+            // Initialize the autonomous agent
+            const AutonomousMarketingAgent = (await import('./src/agents/AutonomousMarketingAgent.js')).default;
+            const agent = new AutonomousMarketingAgent({
+                openaiApiKey: env.OPENAI_API_KEY,
+                paymentGatewayKey: env.PAYMENT_GATEWAY_API_KEY,
+                debug: true
+            });
+
+            // Execute the full autonomous website creation process
+            const result = await agent.execute(userInput);
+            
+            return new Response(JSON.stringify(result), {
+                headers: { "Content-Type": "application/json" },
+            });
+        } else {
+            // Return API documentation
+            const documentation = {
+                endpoint: "/api/autonomous-agent",
+                method: "POST",
+                description: "Execute the complete Elite-Level Autonomous Marketing Website Creation process",
+                parameters: {
+                    skills: "Array of user skills",
+                    interests: "Array of user interests", 
+                    resources: "Object with budget, timeCommitment, etc."
+                },
+                example: {
+                    skills: ["JavaScript", "Marketing", "Design"],
+                    interests: ["Technology", "AI", "Automation"],
+                    resources: {
+                        budget: "medium",
+                        timeCommitment: "full-time",
+                        technicalSkills: "advanced"
+                    }
+                }
+            };
+            
+            return new Response(JSON.stringify(documentation), {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+        });
+    }
+}
+
+async function handleNicheDiscovery(request, env) {
+    try {
+        if (request.method === 'POST') {
+            const userInput = await request.json();
+            
+            const NicheDiscoveryModule = (await import('./src/modules/NicheDiscoveryModule.js')).default;
+            const module = new NicheDiscoveryModule({ openaiApiKey: env.OPENAI_API_KEY });
+            
+            const result = await module.analyze(userInput);
+            
+            return new Response(JSON.stringify(result), {
+                headers: { "Content-Type": "application/json" },
+            });
+        } else {
+            return new Response(JSON.stringify({
+                endpoint: "/api/niche-discovery",
+                method: "POST", 
+                description: "Analyze user profile and discover optimal niches"
+            }), {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+        });
+    }
+}
+
+async function handleKeywordResearch(request, env) {
+    try {
+        if (request.method === 'POST') {
+            const selectedNiche = await request.json();
+            
+            const KeywordResearchModule = (await import('./src/modules/KeywordResearchModule.js')).default;
+            const module = new KeywordResearchModule({ openaiApiKey: env.OPENAI_API_KEY });
+            
+            const result = await module.generateStrategy(selectedNiche);
+            
+            return new Response(JSON.stringify(result), {
+                headers: { "Content-Type": "application/json" },
+            });
+        } else {
+            return new Response(JSON.stringify({
+                endpoint: "/api/keyword-research",
+                method: "POST",
+                description: "Generate comprehensive keyword strategy for selected niche"
+            }), {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+        });
+    }
+}
+
+async function handleTechStack(request, env) {
+    try {
+        if (request.method === 'POST') {
+            const params = await request.json();
+            
+            const TechStackSetupModule = (await import('./src/modules/TechStackSetupModule.js')).default;
+            const module = new TechStackSetupModule({ openaiApiKey: env.OPENAI_API_KEY });
+            
+            const result = await module.selectOptimalStack(params);
+            
+            return new Response(JSON.stringify(result), {
+                headers: { "Content-Type": "application/json" },
+            });
+        } else {
+            return new Response(JSON.stringify({
+                endpoint: "/api/tech-stack",
+                method: "POST",
+                description: "Select and configure optimal tech stack"
+            }), {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+        });
+    }
 }
