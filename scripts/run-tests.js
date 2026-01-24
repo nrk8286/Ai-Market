@@ -29,9 +29,9 @@ const assert = require('assert');
 
   console.log('\nAll lightweight tests passed successfully.');
 
-  // Run integration tests (worker endpoints)
+  // Run integration tests (script runner)
   try {
-    require('../tests/integration.test');
+    require('../tests/integration.script');
   } catch (err) {
     console.error('Integration tests failed:', err);
     process.exit(1);
