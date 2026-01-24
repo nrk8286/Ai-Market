@@ -59,6 +59,21 @@ export default {
             });
         }
 
+        // New: Checkout endpoint (creates a checkout session or returns a payment intent)
+        if (url.pathname.startsWith("/marketplace/checkout")) {
+            return handleCheckout(request, env);
+        }
+
+        // Stripe webhook endpoint for receiving events
+        if (url.pathname.startsWith("/webhooks/stripe")) {
+            return handleStripeWebhook(request, env);
+        }
+
+        // Simple admin API (token-protected) for managing marketplace items
+        if (url.pathname.startsWith("/admin")) {
+            return handleAdmin(request, env);
+        }
+
         if (url.pathname.startsWith("/api/fix-errors")) {
             let result = await fixErrors(env.OPENAI_API_KEY);
             return new Response(result, {
@@ -354,5 +369,88 @@ async function handleTechStack(request, env) {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
+    }
+}
+
+// --- New features: Checkout, Stripe webhook, Admin API (demo/stub implementations) ---
+// In-memory marketplace items (demo)
+const _MARKETPLACE_ITEMS = [
+    { id: 1, name: "AI Content Generator", price: 100 },
+    { id: 2, name: "SEO Optimization Tool", price: 200 }
+];
+
+async function handleCheckout(request, env) {
+    try {
+        if (request.method !== 'POST') {
+            return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        const body = await request.json();
+        const itemId = body.itemId;
+        const item = _MARKETPLACE_ITEMS.find(i => i.id === itemId);
+        if (!item) return new Response(JSON.stringify({ error: 'Item not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+
+        // Simulate creating a payment session (replace with Stripe/real gateway in production)
+        const session = {
+            id: `sess_${Math.random().toString(36).slice(2, 10)}`,
+            checkoutUrl: `https://payments.example.com/checkout/${item.id}?session=${Math.random().toString(36).slice(2, 8)}`
+        };
+
+        return new Response(JSON.stringify({ success: true, session }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+async function handleStripeWebhook(request, env) {
+    try {
+        if (request.method !== 'POST') {
+            return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // In production, verify signature using STRIPE_WEBHOOK_SECRET from env
+        const payload = await request.text();
+        let event;
+        try {
+            event = JSON.parse(payload);
+        } catch (err) {
+            return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Demo handling
+        if (event.type === 'checkout.session.completed') {
+            console.log('Webhook: checkout.session.completed', event.data);
+        }
+
+        return new Response(JSON.stringify({ received: true }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+async function handleAdmin(request, env) {
+    try {
+        const adminToken = env.ADMIN_TOKEN || process.env.ADMIN_TOKEN;
+        const authHeader = request.headers.get('Authorization') || request.headers.get('X-ADMIN-TOKEN');
+        if (!adminToken || authHeader !== `Bearer ${adminToken}`) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        const url = new URL(request.url);
+        if (url.pathname === '/admin/items' && request.method === 'GET') {
+            return new Response(JSON.stringify(_MARKETPLACE_ITEMS), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        if (url.pathname === '/admin/items' && request.method === 'POST') {
+            const body = await request.json();
+            const nextId = _MARKETPLACE_ITEMS.reduce((s, i) => Math.max(s, i.id), 0) + 1;
+            const item = { id: nextId, name: body.name, price: body.price };
+            _MARKETPLACE_ITEMS.push(item);
+            return new Response(JSON.stringify({ success: true, item }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 }

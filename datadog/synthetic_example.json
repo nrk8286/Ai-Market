@@ -1,0 +1,17 @@
+{
+  "name": "AI Marketplace Home Page",
+  "type": "api",
+  "steps": [
+    {
+      "name": "GET home",
+      "request": {
+        "url": "https://searchenginepro.uk/",
+        "method": "GET"
+      },
+      "assertions": [
+        { "operator": "isStatus", "target": 200 }
+      ]
+    }
+  ],
+  "tags": ["e2e-tests"]
+}

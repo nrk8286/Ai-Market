@@ -28,8 +28,9 @@ Purpose: give an AI coding agent concise, actionable context to be productive im
 
 - **Integration points**:
   - OpenAI: used for prompt-driven generation and fixes — follow existing usage patterns (look for OpenAI client initialization, env var usage, and embedding calls).
-  - Payments: `PAYMENT_GATEWAY_API_KEY` — changes here affect transactional flows.
-  - Analytics & monitoring: Plausible and other services are referenced; keep telemetry additions minimal and privacy-focused.
+  - Payments: `PAYMENT_GATEWAY_API_KEY` and Stripe (`STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`) — new demo endpoints `POST /marketplace/checkout` and `POST /webhooks/stripe` are added; use `ADMIN_TOKEN` to protect admin routes.
+  - Analytics & monitoring: Plausible and other services are referenced; Datadog Synthetic example is included at `datadog/synthetic_example.json` and its workflow is gated by `DD_API_KEY`/`DD_APP_KEY` secrets.
+  - Deployment: Cloudflare Workers `wrangler` is used; CI includes a dry-run preview job and a gated `wrangler` E2E job that runs if `CF_API_TOKEN`/`CF_ACCOUNT_ID` are set.
 
 - **How to generate changes safely**:
   - Small focused PRs: change one API route or worker behavior at a time and include a unit/integration test where possible.
