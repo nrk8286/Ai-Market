@@ -2,8 +2,11 @@
 # Note: this file should not contain secrets. Set secrets via environment variables or Cloudflare Dashboard.
 
 name = "ai-marketplace"
-type = "javascript"
+# 'type' removed - use 'main' to point to the Worker entry point
+# type = "javascript"
 # account_id is intentionally left blank here; set via environment or CI secrets when publishing
+# Use the 'main' field to specify the worker entry script so `wrangler` can locate it during publish/dev
+main = "worker.js"
 account_id = ""
 workers_dev = true
 compatibility_date = "2025-01-15"
