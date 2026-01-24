@@ -37,5 +37,16 @@ describe('Billing API', () => {
     expect(gated.res.status).toBe(200);
     const g = JSON.parse(gated.text);
     expect(g.success).toBe(true);
+
+    // attach stripe customer to a different user and verify store
+  });
+
+  test('POST /billing/attach stores mapping (test-mode)', async () => {
+    const env = { TEST_MODE: '1' };
+    const res = await call('/billing/attach', 'POST', { userId: 'user_attach', customerId: 'cus_attach_1' }, {}, env);
+    expect(res.res.status).toBe(200);
+    const json = JSON.parse(res.text);
+    expect(json.customer).toHaveProperty('userId', 'user_attach');
+    expect(json.customer).toHaveProperty('stripeCustomerId', 'cus_attach_1');
   });
 });

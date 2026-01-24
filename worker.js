@@ -112,6 +112,11 @@ export default {
             return handlePricing(request, env);
         }
 
+        // Billing attach endpoint: associate Clerk userId with Stripe customer id
+        if (url.pathname.startsWith('/billing/attach')) {
+            return handleBillingAttach(request, env);
+        }
+
         // Example gated API that requires an active subscription
         if (url.pathname === '/api/pro') {
             return handleProFeature(request, env);
@@ -522,7 +527,34 @@ async function handleProFeature(request, env) {
     if (!userId) return new Response(JSON.stringify({ error: 'Missing X-USER-ID header' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     const store = await getBillingStore();
     if (!store.hasActiveSubscription(userId)) return new Response(JSON.stringify({ error: 'Payment required' }), { status: 402, headers: { 'Content-Type': 'application/json' } });
-    return new Response(JSON.stringify({ success: true, message: 'Welcome to Pro features' }), { headers: { 'Content-Type': 'application/json' } });
+    const customer = store.getCustomer(userId);
+    return new Response(JSON.stringify({ success: true, message: 'Welcome to Pro features', customer }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+// POST /billing/attach { userId, customerId }
+async function handleBillingAttach(request, env) {
+    try {
+        if (request.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        const body = await request.json();
+        const { userId, customerId } = body || {};
+        if (!userId || !customerId) return new Response(JSON.stringify({ error: 'Missing userId or customerId' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+
+        // If CLERK_API_KEY is configured, verify the user exists via Clerk API
+        if (env.CLERK_API_KEY) {
+            try {
+                const clerkRes = await fetch(`https://api.clerk.com/v1/users/${encodeURIComponent(userId)}`, { headers: { Authorization: `Bearer ${env.CLERK_API_KEY}`, 'Content-Type': 'application/json' } });
+                if (!clerkRes.ok) return new Response(JSON.stringify({ error: 'Clerk user not found or invalid CLERK_API_KEY' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            } catch (err) {
+                return new Response(JSON.stringify({ error: 'Clerk verification failed', details: err.message }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+            }
+        }
+
+        const store = await getBillingStore();
+        const cust = store.upsertCustomer(userId, { stripeCustomerId: customerId });
+        return new Response(JSON.stringify({ success: true, customer: cust }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
 }
 
 async function handleStripeWebhook(request, env) {
