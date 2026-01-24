@@ -112,10 +112,12 @@ export default {
             return handleGumroadCheckout(request, env);
         }
 
-        // Simple admin API (token-protected) for managing marketplace items
+        // Simple admin API (token-protected) for managing marketplace items and config
         if (url.pathname.startsWith("/admin")) {
             return handleAdmin(request, env);
         }
+
+        // Admin routes for Gumroad config (GET/POST) are handled under /admin/gumroad/config by handleAdmin
 
         // Pricing page
         if (url.pathname === '/pricing') {
@@ -718,6 +720,26 @@ async function handleAdmin(request, env) {
             const store = await getProductStore();
             const item = store.create({ name: body.name, price: body.price, description: body.description });
             return new Response(JSON.stringify({ success: true, item }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Admin: GET/POST Gumroad config
+        if (url.pathname === '/admin/gumroad/config') {
+            if (request.method === 'GET') {
+                const ConfigStore = (await import('./src/services/ConfigStore.js')).default;
+                const configStore = new ConfigStore({ useFile: true });
+                return new Response(JSON.stringify({ success: true, config: configStore.get('gumroad') || {} }), { headers: { 'Content-Type': 'application/json' } });
+            }
+
+            if (request.method === 'POST') {
+                const body = await request.json();
+                const ConfigStore = (await import('./src/services/ConfigStore.js')).default;
+                const configStore = new ConfigStore({ useFile: true });
+                const existing = configStore.get('gumroad') || {};
+                const next = Object.assign({}, existing, body);
+                // Do not store raw secrets unless explicitly requested; keep secret fields under 'secret' key
+                configStore.set('gumroad', next);
+                return new Response(JSON.stringify({ success: true, config: next }), { headers: { 'Content-Type': 'application/json' } });
+            }
         }
 
         // PUT /admin/items/:id
