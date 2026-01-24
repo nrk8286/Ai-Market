@@ -49,4 +49,24 @@ describe('Billing API', () => {
     expect(json.customer).toHaveProperty('userId', 'user_attach');
     expect(json.customer).toHaveProperty('stripeCustomerId', 'cus_attach_1');
   });
+
+  test('Webhook without customer creates Stripe customer and attaches to user', async () => {
+    const env = { TEST_MODE: '1' };
+    const sessionEvent = {
+      type: 'checkout.session.completed',
+      data: { object: { id: 'cs_test_2', client_reference_id: 'user_3', // note: no customer field
+        subscription: 'sub_test_2', customer_email: 'u3@example.com' } }
+    };
+
+    const hook = await call('/webhooks/stripe', 'POST', sessionEvent, {}, env);
+    expect(hook.res.status).toBe(200);
+
+    // verify that /api/pro now allows access (subscription created and customer attached)
+    const gated = await call('/api/pro', 'GET', null, { 'X-USER-ID': 'user_3' }, env);
+    expect(gated.res.status).toBe(200);
+    const g = JSON.parse(gated.text);
+    expect(g.success).toBe(true);
+    expect(g.customer).toHaveProperty('stripeCustomerId');
+    expect(g.customer.stripeCustomerId).toMatch(/^cus_sim_/);
+  });
 });

@@ -52,6 +52,14 @@ class StripeClient {
     return { url: `https://connect.stripe.com/onboard/${accountId || 'sim'}` };
   }
 
+  async createCustomer({ email, metadata = {} } = {}) {
+    if (this.client) {
+      return await this.client.customers.create({ email, metadata });
+    }
+    // Simulated customer
+    return { id: `cus_sim_${Math.random().toString(36).slice(2,10)}`, email, metadata };
+  }
+
   verifyWebhook(payload, sigHeader, secret) {
     if (this.client && secret) {
       try {

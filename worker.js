@@ -583,8 +583,26 @@ async function handleStripeWebhook(request, env) {
             const userId = session.client_reference_id || session.client_reference || session.metadata?.userId || null;
             if (userId) {
                 const store = await getBillingStore();
-                const subscription = { id: session.subscription || session.subscription_id || `sub_${Math.random().toString(36).slice(2,8)}`, status: 'active', customer: session.customer || session.customer_id || null, createdAt: new Date().toISOString() };
+
+                // If session has a customer id, use it; otherwise, attempt to create one via Stripe
+                let customerId = session.customer || session.customer_id || null;
+                const StripeClient = (await import('./src/services/StripeClient.js')).default;
+                const stripe = new StripeClient(env.STRIPE_SECRET_KEY || '');
+
+                if (!customerId) {
+                    try {
+                        // Create a Stripe Customer (or simulated one in test-mode)
+                        const created = await stripe.createCustomer({ email: session.customer_email || session.customer_email_address || undefined, metadata: { userId } });
+                        customerId = created.id;
+                        console.log('Billing: created Stripe customer', customerId, 'for user', userId);
+                    } catch (err) {
+                        console.log('Billing: failed to create Stripe customer', err.message);
+                    }
+                }
+
+                const subscription = { id: session.subscription || session.subscription_id || `sub_${Math.random().toString(36).slice(2,8)}`, status: 'active', customer: customerId, createdAt: new Date().toISOString() };
                 store.upsertSubscription(userId, subscription);
+                if (customerId) store.upsertCustomer(userId, { stripeCustomerId: customerId });
                 console.log('Billing: set active subscription for', userId, subscription.id);
             } else {
                 console.log('Webhook: checkout.session.completed missing client_reference_id');
