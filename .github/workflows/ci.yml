@@ -22,3 +22,31 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Run coverage (Jest)
+        run: npm run test:coverage || true
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage || []
+
+  e2e-wrangler:
+    needs: test
+    if: ${{ secrets.CF_API_TOKEN && secrets.CF_ACCOUNT_ID }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run wrangler E2E tests
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          npm run test:e2e:wrangler
+

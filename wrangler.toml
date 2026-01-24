@@ -1,19 +1,18 @@
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
-data-cf-beacon='{"token": "f598890e674741e49ac2a848c1f338a2"}'>
-</script>
-<!-- End Cloudflare Web Analytics -->
+# wrangler.toml
+# Note: this file should not contain secrets. Set secrets via environment variables or Cloudflare Dashboard.
 
 name = "ai-marketplace"
 type = "javascript"
-account_id = "b614a334d81a99630c1b32f074e44a9e"
+# account_id is intentionally left blank here; set via environment or CI secrets when publishing
+account_id = ""
 workers_dev = true
 compatibility_date = "2025-01-15"
 
 [vars]
 SITE_TITLE = "AI Marketplace"
-OPENAI_API_KEY = "AIzaSyC-VESuBdVYAo-nrNgFXmrzd8cdgKLd-OI"
-PAYMENT_GATEWAY_API_KEY = "BCR2DN7TRDZ5B2LG"
+# Do NOT store sensitive keys here. Use environment variables instead.
+# OPENAI_API_KEY = ""
+# PAYMENT_GATEWAY_API_KEY = ""
 
 [env.production]
 name = "ai-marketplace-production"

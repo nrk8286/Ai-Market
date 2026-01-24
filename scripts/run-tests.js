@@ -29,11 +29,19 @@ const assert = require('assert');
 
   console.log('\nAll lightweight tests passed successfully.');
 
-  // Run integration tests (worker endpoints)
+  // Run integration tests (script runner)
   try {
-    require('../tests/integration.test');
+    require('../tests/integration.script');
   } catch (err) {
     console.error('Integration tests failed:', err);
+    process.exit(1);
+  }
+
+  // Run E2E script (Miniflare) as a fallback when Jest E2E is not available
+  try {
+    require('../tests/e2e.script');
+  } catch (err) {
+    console.error('E2E script runner failed:', err);
     process.exit(1);
   }
 })();

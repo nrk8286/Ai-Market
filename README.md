@@ -75,14 +75,17 @@ console.log('Your website is ready at:', result.websiteUrl);
 
 ## 🛠 Modern Tech Stack (2025)
 
-- **Frontend**: Next.js 14, Tailwind CSS, shadcn/ui, Framer Motion
-- **Backend**: Node.js 20, Fastify, Drizzle ORM, Redis
-- **Database**: Neon PostgreSQL (serverless)
+- **Frontend**: Next.js 14 (installed as `next@^14.0.0`), Tailwind CSS
+- **Backend**: Node.js 20, Fastify (`fastify@^4.25.0`)
+- **Database & ORM**: Neon PostgreSQL / `pg` (`pg@^8.11.0`), Drizzle ORM (`drizzle-orm@^0.30.0`)
+- **Cache**: Redis (`redis@^4.6.15`)
 - **Hosting**: Vercel (serverless deployment)
-- **Authentication**: Clerk (enterprise-grade)
+- **Authentication**: Clerk (`@clerk/clerk-sdk-node@^4.0.0`)
 - **Analytics**: Plausible Analytics (privacy-focused)
-- **AI**: OpenAI GPT-4, Embeddings, Pinecone vector DB
+- **AI**: OpenAI (`openai@^6.16.0`), embeddings, vector DB
 - **Automation**: Zapier, n8n workflows
+
+Note: If you plan to upgrade major frameworks (Next.js, React), update `package.json` and run the test suite to check for compatibility issues.
 
 ## 🚀 API Endpoints
 
