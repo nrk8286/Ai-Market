@@ -35,6 +35,17 @@
   "devDependencies": {
     "jest": "^29.6.1"
   },
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "wrangler publish",
+    "test": "node scripts/test.js",
+    "test:jest": "jest --runInBand",
+    "test:watch": "jest --watchAll",
+    "test:coverage": "jest --coverage",
+    "test:light": "node scripts/run-tests.js",
+    "test:e2e": "jest tests/e2e.test.js --runInBand",
+    "test:e2e:light": "node tests/e2e.script.js"
+  },
   "author": "nrk8286",
   "license": "MIT",
   "engines": {
