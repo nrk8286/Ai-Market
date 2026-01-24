@@ -97,6 +97,11 @@ export default {
             return handleStripeWebhook(request, env);
         }
 
+        // Marketplace Connect onboarding
+        if (url.pathname.startsWith('/marketplace/connect/onboard')) {
+            return handleConnectOnboard(request, env);
+        }
+
         // Simple admin API (token-protected) for managing marketplace items
         if (url.pathname.startsWith("/admin")) {
             return handleAdmin(request, env);
@@ -432,13 +437,26 @@ async function handleCheckout(request, env) {
         const item = _MARKETPLACE_ITEMS.find(i => i.id === itemId);
         if (!item) return new Response(JSON.stringify({ error: 'Item not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
 
-        // Simulate creating a payment session (replace with Stripe/real gateway in production)
-        const session = {
-            id: `sess_${Math.random().toString(36).slice(2, 10)}`,
-            checkoutUrl: `https://payments.example.com/checkout/${item.id}?session=${Math.random().toString(36).slice(2, 8)}`
-        };
+        // Vendor marketplace checkout support
+        const vendorId = body.vendorId || null;
+        const amount = item.price * 100; // cents
+        const currency = body.currency || 'usd';
 
-        return new Response(JSON.stringify({ success: true, session }), { headers: { 'Content-Type': 'application/json' } });
+        const platformFeePct = Number(env.PLATFORM_FEE_PERCENTAGE || 10);
+        const platformFee = Math.round(amount * (platformFeePct / 100));
+
+        // If Stripe configured, use StripeClient to create PaymentIntent with transfer to vendor
+        const StripeClient = (await import('./src/services/StripeClient.js')).default;
+        const stripe = new StripeClient(env.STRIPE_SECRET_KEY || '');
+
+        if (stripe.isAvailable()) {
+            const pi = await stripe.createPaymentIntentForVendor({ amount, currency, vendorAccountId: vendorId, platformFee, description: `Purchase ${item.name}` });
+            return new Response(JSON.stringify({ success: true, paymentIntent: pi }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Simulated session / payment intent
+        const sim = { id: `pi_sim_${Math.random().toString(36).slice(2,10)}`, amount, currency, vendor: vendorId, platformFee };
+        return new Response(JSON.stringify({ success: true, paymentIntent: sim }), { headers: { 'Content-Type': 'application/json' } });
     } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
@@ -516,29 +534,20 @@ async function handleStripeWebhook(request, env) {
         const payload = await request.text();
         let event = null;
 
-        // If a webhook secret is available, attempt to verify the signature (only works when Stripe SDK available)
+        // Use StripeClient helper to verify when possible
+        const StripeClient = (await import('./src/services/StripeClient.js')).default;
+        const stripe = new StripeClient(env.STRIPE_SECRET_KEY || '');
         const sig = request.headers.get('stripe-signature') || request.headers.get('Stripe-Signature');
-        if (env.STRIPE_WEBHOOK_SECRET && sig) {
-            try {
-                const Stripe = require('stripe');
-                const stripe = Stripe(env.STRIPE_SECRET_KEY || '');
-                event = stripe.webhooks.constructEvent(payload, sig, env.STRIPE_WEBHOOK_SECRET);
-            } catch (err) {
-                return new Response(JSON.stringify({ error: 'Webhook signature verification failed', details: err.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-            }
-        } else {
-            // Fallback: parse JSON body (test or demo mode)
-            try {
-                event = JSON.parse(payload);
-            } catch (err) {
-                return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-            }
+        try {
+            event = stripe.verifyWebhook(payload, sig, env.STRIPE_WEBHOOK_SECRET);
+        } catch (err) {
+            return new Response(JSON.stringify({ error: 'Webhook signature verification failed', details: err.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
 
-        // Handle events
+        // Handle checkout.session.completed
         if (event && event.type === 'checkout.session.completed') {
-            const data = event.data || event.data || {};
-            const session = data.object || event.data?.object || event.object || {};
+            const data = event.data || {};
+            const session = data.object || event.object || {};
             const userId = session.client_reference_id || session.client_reference || session.metadata?.userId || null;
             if (userId) {
                 const store = await getBillingStore();
@@ -547,6 +556,19 @@ async function handleStripeWebhook(request, env) {
                 console.log('Billing: set active subscription for', userId, subscription.id);
             } else {
                 console.log('Webhook: checkout.session.completed missing client_reference_id');
+            }
+        }
+
+        // Handle payment_intent.succeeded for marketplace payments
+        if (event && event.type === 'payment_intent.succeeded') {
+            const pi = event.data?.object || event.object || {};
+            const metadata = pi.metadata || {};
+            const vendorId = metadata.vendorId || null;
+            if (vendorId) {
+                const store = await getBillingStore();
+                const v = store.getVendor(vendorId);
+                console.log('Marketplace payment succeeded for vendor', vendorId, 'vendor exists?', !!v);
+                // Additional bookkeeping could go here (e.g., mark payout scheduled)
             }
         }
 

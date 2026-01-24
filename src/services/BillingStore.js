@@ -5,6 +5,7 @@ class BillingStore {
     this.useFile = explicitFile && isNode;
     this.filePath = null;
     this.customers = [];
+    this.vendors = []; // vendor accounts for marketplace sellers
 
     if (this.useFile) {
       try {
@@ -15,11 +16,11 @@ class BillingStore {
           fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
         }
         if (fs.existsSync(this.filePath)) {
-          const raw = fs.readFileSync(this.filePath, 'utf8') || '[]';
-          this.customers = JSON.parse(raw);
+          this._loadFromFile();
         } else {
           this.customers = [];
-          fs.writeFileSync(this.filePath, JSON.stringify(this.customers, null, 2));
+          this.vendors = [];
+          fs.writeFileSync(this.filePath, JSON.stringify({ customers: this.customers, vendors: this.vendors }, null, 2));
         }
       } catch (err) {
         this.useFile = false;
@@ -32,7 +33,21 @@ class BillingStore {
     if (this.useFile && this.filePath) {
       try {
         const fs = require('fs');
-        fs.writeFileSync(this.filePath, JSON.stringify(this.customers, null, 2));
+        fs.writeFileSync(this.filePath, JSON.stringify({ customers: this.customers, vendors: this.vendors }, null, 2));
+      } catch (err) {
+        // ignore
+      }
+    }
+  }
+
+  _loadFromFile() {
+    if (this.useFile && this.filePath) {
+      try {
+        const fs = require('fs');
+        const raw = fs.readFileSync(this.filePath, 'utf8') || '{}';
+        const parsed = JSON.parse(raw);
+        this.customers = parsed.customers || [];
+        this.vendors = parsed.vendors || [];
       } catch (err) {
         // ignore
       }
@@ -71,7 +86,25 @@ class BillingStore {
     if (!cust) return false;
     return cust.subscriptions.some(s => s.status === 'active' || s.status === 'trialing');
   }
+
+  // Vendor helpers
+  upsertVendor(vendorId, data = {}) {
+    let v = this.vendors.find(x => x.vendorId === vendorId);
+    if (!v) {
+      v = { vendorId, createdAt: new Date().toISOString(), ...data };
+      this.vendors.push(v);
+    } else {
+      Object.assign(v, data);
+    }
+    this._persist();
+    return v;
+  }
+
+  getVendor(vendorId) {
+    return this.vendors.find(x => x.vendorId === vendorId) || null;
+  }
 }
+
 
 module.exports = BillingStore;
 module.exports.default = BillingStore;
