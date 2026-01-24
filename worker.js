@@ -648,11 +648,23 @@ async function handleGumroadCheckout(request, env) {
         const product = url.searchParams.get('product');
         if (!product) return new Response(JSON.stringify({ error: 'Missing product param' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 
-        // Map product id to Gumroad product URL via env or default pattern
-        const mapping = (env.GUMROAD_PRODUCT_URLS && JSON.parse(env.GUMROAD_PRODUCT_URLS)) || { prod_1: 'https://gumroad.com/l/example-product' };
-        const gumUrl = mapping[product] || mapping[product] || `https://gumroad.com/l/${product}`;
+        // Load config from ConfigStore (if available) or fall back to env
+        const ConfigStore = (await import('./src/services/ConfigStore.js')).default;
+        const configStore = new ConfigStore({ useFile: true });
+        const gumConfig = configStore.get('gumroad') || {};
 
-        return new Response(JSON.stringify({ url: gumUrl }), { headers: { 'Content-Type': 'application/json' } });
+        // Gumroad affiliate ID for tracking
+        const affiliateId = gumConfig.affiliateId || env.GUMROAD_AFFILIATE_ID || '916801939';
+
+        // Map product id to Gumroad product URL via config, env, or default pattern
+        const mapping = gumConfig.mapping || (env.GUMROAD_PRODUCT_URLS && JSON.parse(env.GUMROAD_PRODUCT_URLS)) || {};
+        let gumUrl = mapping[product] || `https://gumroad.com/l/${product}`;
+
+        // Append affiliate tracking param
+        const separator = gumUrl.includes('?') ? '&' : '?';
+        gumUrl = `${gumUrl}${separator}a=${affiliateId}`;
+
+        return new Response(JSON.stringify({ url: gumUrl, affiliateId }), { headers: { 'Content-Type': 'application/json' } });
     } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
