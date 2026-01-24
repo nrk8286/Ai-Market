@@ -1,4 +1,16 @@
 {
+  "name": "ai-market",
+  "version": "1.0.0",
+  "description": "AI market place",
+  "main": "worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "docker-compose up",
+    "build": "docker-compose build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
   "name": "ai-marketplace",
   "version": "1.0.0",
   "description": "AI-powered marketplace for innovative tools and services.",

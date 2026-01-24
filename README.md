@@ -1,3 +1,13 @@
+# Ai-Market
+AI market place
+
+## Docker Usage
+
+To pull the `langgenius/dify-api` Docker image, use the following command:
+
+```bash
+docker pull langgenius/dify-api
+```
 # Elite-Level Autonomous Marketing Website Creation System
 
 Welcome to the **Elite-Level AI Prompt System** for fully autonomous marketing website creation! This cutting-edge platform implements the most advanced AI-driven approach to building income-generating websites with minimal human intervention.
