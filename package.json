@@ -11,4 +11,43 @@
   "keywords": [],
   "author": "",
   "license": "ISC"
+  "name": "ai-marketplace",
+  "version": "1.0.0",
+  "description": "AI-powered marketplace for innovative tools and services.",
+  "main": "worker.js",
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "wrangler publish",
+    "test": "node scripts/run-tests.js",
+    "test:watch": "node scripts/run-tests.js --watch",
+    "test:coverage": "node scripts/run-tests.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.5",
+    "next": "^14.0.0",
+    "openai": "^6.16.0",
+    "passport": "^0.7.0",
+    "passport-oauth2": "^1.6.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "stripe": "^8.174.0",
+    "tailwindcss": "^2.2.16",
+    "fastify": "^4.25.0",
+    "drizzle-orm": "^0.30.0",
+    "pg": "^8.11.0",
+    "redis": "^4.6.15",
+    "@clerk/clerk-sdk-node": "^4.0.0"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6"
+  },
+  "author": "nrk8286",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
 }
