@@ -1,7 +1,7 @@
 # wrangler.toml
 # Note: this file should not contain secrets. Set secrets via environment variables or Cloudflare Dashboard.
 
-name = "ai-marketplace"
+name = 'ai-market-plus'
 # 'type' removed - use 'main' to point to the Worker entry point
 # type = "javascript"
 # account_id is intentionally left blank here; set via environment or CI secrets when publishing
@@ -21,3 +21,13 @@ SITE_TITLE = "AI Marketplace"
 name = "ai-marketplace-production"
 route = "searchenginepro.uk/*"
 zone_id = "your_zone_id"
+
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+[observability.traces]
+enabled = true
+
+# wrangler.toml
