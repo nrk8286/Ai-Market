@@ -10,43 +10,34 @@
     "test:jest": "jest --runInBand",
     "test:watch": "jest --watchAll",
     "test:coverage": "jest --coverage",
-    "test:light": "node scripts/run-tests.js"
+    "test:light": "node scripts/run-tests.js",
+    "test:e2e": "jest tests/e2e.test.js --runInBand",
+    "test:e2e:light": "node tests/e2e.script.js",
+    "test:e2e:wrangler": "node scripts/run-e2e-wrangler.js"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.0.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^10.0.0",
+    "drizzle-orm": "^0.30.0",
     "express": "^4.17.1",
+    "fastify": "^4.25.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
     "next": "^14.0.0",
     "openai": "^6.16.0",
     "passport": "^0.7.0",
     "passport-oauth2": "^1.6.1",
+    "pg": "^8.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "stripe": "^8.174.0",
-    "tailwindcss": "^2.2.16",
-    "fastify": "^4.25.0",
-    "drizzle-orm": "^0.30.0",
-    "pg": "^8.11.0",
     "redis": "^4.6.15",
-    "@clerk/clerk-sdk-node": "^4.0.0"
+    "stripe": "^8.174.0",
+    "tailwindcss": "^2.2.16"
   },
   "devDependencies": {
     "jest": "^29.6.1",
-    "wrangler": "^3.0.0"
-  },
-  "scripts": {
-    "start": "wrangler dev",
-    "deploy": "wrangler publish",
-    "test": "node scripts/test.js",
-    "test:jest": "jest --runInBand",
-    "test:watch": "jest --watchAll",
-    "test:coverage": "jest --coverage",
-    "test:light": "node scripts/run-tests.js",
-    "test:e2e": "jest tests/e2e.test.js --runInBand",
-    "test:e2e:light": "node tests/e2e.script.js",
-    "test:e2e:wrangler": "node scripts/run-e2e-wrangler.js"
+    "wrangler": "^4.60.0"
   },
   "author": "nrk8286",
   "license": "MIT",

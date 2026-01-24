@@ -24,27 +24,84 @@ async function waitForServer(url, timeoutMs) {
 
 (async () => {
   console.log('Starting wrangler dev...');
-  const child = spawn(WRANGLER_CMD, WRANGLER_ARGS, {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env }
+
+  const fs = require('fs');
+  const path = require('path');
+
+  const candidates = [];
+  // Prefer local node_modules binary if present
+  const binPath = path.join(process.cwd(), 'node_modules', '.bin', `wrangler${process.platform === 'win32' ? '.cmd' : ''}`);
+  if (fs.existsSync(binPath)) candidates.push({ cmd: binPath, args: ['dev', 'worker.js', '--port', '8787'] });
+
+  // Fallback to npx (works if npm installed globally)
+  if (process.platform === 'win32') {
+    candidates.push({ cmd: 'npx.cmd', args: ['wrangler', 'dev', 'worker.js', '--port', '8787'] });
+  } else {
+    candidates.push({ cmd: 'npx', args: ['wrangler', 'dev', 'worker.js', '--port', '8787'] });
+  }
+
+  // Try a plain 'wrangler' command as a last resort
+  candidates.push({ cmd: 'wrangler', args: ['dev', 'worker.js', '--port', '8787'] });
+
+  const trySpawn = (cmd, args) => new Promise(resolve => {
+    try {
+      const c = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env }, shell: true });
+      let failed = false;
+
+      const onError = (err) => {
+        failed = true;
+        try { c.kill(); } catch (e) {}
+        resolve(null);
+      };
+
+      c.on('error', onError);
+      c.stdout.on('data', d => process.stdout.write(d));
+      c.stderr.on('data', d => process.stderr.write(d));
+
+      // If spawn happens without error within a short window, assume success
+      c.on('spawn', () => resolve(c));
+      setTimeout(() => {
+        if (!failed) resolve(c);
+      }, 500);
+    } catch (err) {
+      console.warn(`Could not spawn '${cmd}': ${err.message}`);
+      resolve(null);
+    }
   });
 
-  child.stdout.on('data', d => process.stdout.write(d));
-  child.stderr.on('data', d => process.stderr.write(d));
+  let child = null;
+  let startedBy = null;
 
-  const running = await waitForServer(BASE_URL + '/', START_TIMEOUT);
-  if (!running) {
-    console.error(`wrangler dev did not start within ${START_TIMEOUT}ms`);
-    child.kill();
+  for (const c of candidates) {
+    /* eslint-disable no-await-in-loop */
+    const maybe = await trySpawn(c.cmd, c.args);
+    if (maybe) {
+      child = maybe;
+      startedBy = `${c.cmd} ${c.args.join(' ')}`;
+      break;
+    } else {
+      console.warn(`Attempt with '${c.cmd}' failed, trying next candidate...`);
+    }
+  }
+
+  if (!child) {
+    console.error('Failed to start wrangler dev. Ensure `wrangler` is installed (npm i --save-dev wrangler) or available in PATH.');
     process.exit(1);
   }
 
-  console.log('wrangler dev started, running E2E Jest tests...');
+  const running = await waitForServer(BASE_URL + '/', START_TIMEOUT);
+  if (!running) {
+    console.error(`wrangler dev (started with ${startedBy}) did not start within ${START_TIMEOUT}ms`);
+    try { child.kill(); } catch (e) {}
+    process.exit(1);
+  }
 
-  const jestArgs = ['jest', 'tests/e2e.wrangler.test.js', '--runInBand'];
-  const jestRun = spawnSync('npx', jestArgs, {
+  console.log(`wrangler dev started (${startedBy}), running E2E Jest tests...`);
+
+  // Run the project's test wrapper and request only the E2E wrangler test file
+  const jestRun = spawnSync('node', ['scripts/test.js'], {
     stdio: 'inherit',
-    env: { ...process.env, E2E_BASE_URL: BASE_URL }
+    env: { ...process.env, E2E_BASE_URL: BASE_URL, JEST_TEST_FILE: 'tests/e2e.wrangler.test.js' }
   });
 
   console.log('Killing wrangler dev...');
