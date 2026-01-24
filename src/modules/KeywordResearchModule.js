@@ -526,3 +526,4 @@ class KeywordResearchModule {
 }
 
 module.exports = KeywordResearchModule;
+module.exports.default = KeywordResearchModule;
