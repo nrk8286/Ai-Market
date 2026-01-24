@@ -52,16 +52,44 @@ export default {
             });
         }
 
-        if (url.pathname.startsWith("/marketplace/buy")) {
+        if (url.pathname.startsWith('/marketplace/buy')) {
             let result = await processPayment(env.PAYMENT_GATEWAY_API_KEY, request);
             return new Response(result, {
-                headers: { "Content-Type": "application/json" },
+                headers: { 'Content-Type': 'application/json' },
             });
+        }
+
+        // Marketplace product endpoints
+        if (url.pathname === '/marketplace/items' && request.method === 'GET') {
+            const store = await getProductStore();
+            const items = store.getAll();
+            return new Response(JSON.stringify(items), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // GET product by id
+        const itemMatch = url.pathname.match(/^\/marketplace\/items\/(\d+)$/);
+        if (itemMatch && request.method === 'GET') {
+            const id = itemMatch[1];
+            const store = await getProductStore();
+            const item = store.getById(id);
+            if (!item) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify(item), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Admin product CRUD endpoints
+        if (url.pathname.startsWith('/admin/items')) {
+            // delegate to handleAdmin which already handles auth and POST; extend it to support PUT/DELETE
+            return handleAdmin(request, env);
         }
 
         // New: Checkout endpoint (creates a checkout session or returns a payment intent)
         if (url.pathname.startsWith("/marketplace/checkout")) {
             return handleCheckout(request, env);
+        }
+
+        // Stripe billing checkout for subscriptions
+        if (url.pathname.startsWith("/billing/checkout")) {
+            return handleBillingCheckout(request, env);
         }
 
         // Stripe webhook endpoint for receiving events
@@ -72,6 +100,16 @@ export default {
         // Simple admin API (token-protected) for managing marketplace items
         if (url.pathname.startsWith("/admin")) {
             return handleAdmin(request, env);
+        }
+
+        // Pricing page
+        if (url.pathname === '/pricing') {
+            return handlePricing(request, env);
+        }
+
+        // Example gated API that requires an active subscription
+        if (url.pathname === '/api/pro') {
+            return handleProFeature(request, env);
         }
 
         if (url.pathname.startsWith("/api/fix-errors")) {
@@ -373,11 +411,15 @@ async function handleTechStack(request, env) {
 }
 
 // --- New features: Checkout, Stripe webhook, Admin API (demo/stub implementations) ---
-// In-memory marketplace items (demo)
-const _MARKETPLACE_ITEMS = [
-    { id: 1, name: "AI Content Generator", price: 100 },
-    { id: 2, name: "SEO Optimization Tool", price: 200 }
-];
+// Product store (file-backed in dev, in-memory in Cloudflare)
+let productStore = null;
+async function getProductStore() {
+    if (productStore) return productStore;
+    const mod = await import('./src/services/ProductStore.js');
+    const ProductStore = mod.default || mod;
+    productStore = new ProductStore({ useFile: true });
+    return productStore;
+}
 
 async function handleCheckout(request, env) {
     try {
@@ -402,24 +444,110 @@ async function handleCheckout(request, env) {
     }
 }
 
+// Billing / Subscriptions
+let billingStore = null;
+async function getBillingStore() {
+    if (billingStore) return billingStore;
+    const mod = await import('./src/services/BillingStore.js');
+    const BillingStore = mod.default || mod;
+    billingStore = new BillingStore({ useFile: true });
+    return billingStore;
+}
+
+async function handleBillingCheckout(request, env) {
+    try {
+        if (request.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+        const body = await request.json();
+        const plan = body.plan || 'pro';
+        const userId = body.userId || (body.user && body.user.id) || null;
+        if (!userId) return new Response(JSON.stringify({ error: 'Missing userId' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+
+        // If STRIPE_SECRET_KEY is provided and we're not in test mode, create a real Checkout Session
+        if (env.STRIPE_SECRET_KEY && !env.TEST_MODE) {
+            try {
+                const Stripe = require('stripe');
+                const stripe = Stripe(env.STRIPE_SECRET_KEY);
+                const session = await stripe.checkout.sessions.create({
+                    mode: 'subscription',
+                    payment_method_types: ['card'],
+                    line_items: [{ price: planToPriceId(plan, env), quantity: 1 }],
+                    success_url: body.successUrl || 'https://example.com/success',
+                    cancel_url: body.cancelUrl || 'https://example.com/cancel',
+                    client_reference_id: userId
+                });
+                return new Response(JSON.stringify({ success: true, session }), { headers: { 'Content-Type': 'application/json' } });
+            } catch (err) {
+                return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+            }
+        }
+
+        // Test-mode / simulated session for local tests
+        const session = { id: `cs_test_${Math.random().toString(36).slice(2, 10)}`, url: `https://test.pay/checkout/${plan}/${userId}`, client_reference_id: userId };
+        return new Response(JSON.stringify({ success: true, session }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+function planToPriceId(plan, env) {
+    // Map plan names to Stripe price IDs via env var (PRICE_PRO, PRICE_TEAM)
+    if (plan === 'team') return env.PRICE_TEAM || 'price_team_placeholder';
+    return env.PRICE_PRO || 'price_pro_placeholder';
+}
+
+async function handlePricing(request, env) {
+    return new Response(JSON.stringify({ plans: [{ id: 'free', price: 0 }, { id: 'pro', price: 29 }, { id: 'team', price: 99 }] }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleProFeature(request, env) {
+    const userId = request.headers.get('X-USER-ID');
+    if (!userId) return new Response(JSON.stringify({ error: 'Missing X-USER-ID header' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    const store = await getBillingStore();
+    if (!store.hasActiveSubscription(userId)) return new Response(JSON.stringify({ error: 'Payment required' }), { status: 402, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: true, message: 'Welcome to Pro features' }), { headers: { 'Content-Type': 'application/json' } });
+}
+
 async function handleStripeWebhook(request, env) {
     try {
         if (request.method !== 'POST') {
             return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
         }
 
-        // In production, verify signature using STRIPE_WEBHOOK_SECRET from env
         const payload = await request.text();
-        let event;
-        try {
-            event = JSON.parse(payload);
-        } catch (err) {
-            return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        let event = null;
+
+        // If a webhook secret is available, attempt to verify the signature (only works when Stripe SDK available)
+        const sig = request.headers.get('stripe-signature') || request.headers.get('Stripe-Signature');
+        if (env.STRIPE_WEBHOOK_SECRET && sig) {
+            try {
+                const Stripe = require('stripe');
+                const stripe = Stripe(env.STRIPE_SECRET_KEY || '');
+                event = stripe.webhooks.constructEvent(payload, sig, env.STRIPE_WEBHOOK_SECRET);
+            } catch (err) {
+                return new Response(JSON.stringify({ error: 'Webhook signature verification failed', details: err.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
+        } else {
+            // Fallback: parse JSON body (test or demo mode)
+            try {
+                event = JSON.parse(payload);
+            } catch (err) {
+                return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
         }
 
-        // Demo handling
-        if (event.type === 'checkout.session.completed') {
-            console.log('Webhook: checkout.session.completed', event.data);
+        // Handle events
+        if (event && event.type === 'checkout.session.completed') {
+            const data = event.data || event.data || {};
+            const session = data.object || event.data?.object || event.object || {};
+            const userId = session.client_reference_id || session.client_reference || session.metadata?.userId || null;
+            if (userId) {
+                const store = await getBillingStore();
+                const subscription = { id: session.subscription || session.subscription_id || `sub_${Math.random().toString(36).slice(2,8)}`, status: 'active', customer: session.customer || session.customer_id || null, createdAt: new Date().toISOString() };
+                store.upsertSubscription(userId, subscription);
+                console.log('Billing: set active subscription for', userId, subscription.id);
+            } else {
+                console.log('Webhook: checkout.session.completed missing client_reference_id');
+            }
         }
 
         return new Response(JSON.stringify({ received: true }), { headers: { 'Content-Type': 'application/json' } });
@@ -438,16 +566,38 @@ async function handleAdmin(request, env) {
 
         const url = new URL(request.url);
         if (url.pathname === '/admin/items' && request.method === 'GET') {
-            return new Response(JSON.stringify(_MARKETPLACE_ITEMS), { headers: { 'Content-Type': 'application/json' } });
+            const store = await getProductStore();
+            return new Response(JSON.stringify(store.getAll()), { headers: { 'Content-Type': 'application/json' } });
         }
 
         if (url.pathname === '/admin/items' && request.method === 'POST') {
             const body = await request.json();
-            const nextId = _MARKETPLACE_ITEMS.reduce((s, i) => Math.max(s, i.id), 0) + 1;
-            const item = { id: nextId, name: body.name, price: body.price };
-            _MARKETPLACE_ITEMS.push(item);
+            const store = await getProductStore();
+            const item = store.create({ name: body.name, price: body.price, description: body.description });
             return new Response(JSON.stringify({ success: true, item }), { headers: { 'Content-Type': 'application/json' } });
         }
+
+        // PUT /admin/items/:id
+        const adminPutMatch = url.pathname.match(/^\/admin\/items\/(\d+)$/);
+        if (adminPutMatch && request.method === 'PUT') {
+            const id = adminPutMatch[1];
+            const body = await request.json();
+            const store = await getProductStore();
+            const updated = store.update(id, body);
+            if (!updated) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ success: true, item: updated }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // DELETE /admin/items/:id
+        const adminDelMatch = url.pathname.match(/^\/admin\/items\/(\d+)$/);
+        if (adminDelMatch && request.method === 'DELETE') {
+            const id = adminDelMatch[1];
+            const store = await getProductStore();
+            const ok = store.delete(id);
+            if (!ok) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
 
         return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
     } catch (error) {
