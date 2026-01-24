@@ -97,9 +97,19 @@ export default {
             return handleStripeWebhook(request, env);
         }
 
+        // Gumroad webhook endpoint
+        if (url.pathname.startsWith('/webhooks/gumroad')) {
+            return handleGumroadWebhook(request, env);
+        }
+
         // Marketplace Connect onboarding
         if (url.pathname.startsWith('/marketplace/connect/onboard')) {
             return handleConnectOnboard(request, env);
+        }
+
+        // Gumroad checkout redirect endpoint
+        if (url.pathname.startsWith('/marketplace/gumroad/checkout')) {
+            return handleGumroadCheckout(request, env);
         }
 
         // Simple admin API (token-protected) for managing marketplace items
@@ -625,6 +635,67 @@ async function handleStripeWebhook(request, env) {
         return new Response(JSON.stringify({ received: true }), { headers: { 'Content-Type': 'application/json' } });
     } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// --- Gumroad handlers ---
+async function handleGumroadCheckout(request, env) {
+    try {
+        // Accepts ?product=<id>
+        const url = new URL(request.url);
+        const product = url.searchParams.get('product');
+        if (!product) return new Response(JSON.stringify({ error: 'Missing product param' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+
+        // Map product id to Gumroad product URL via env or default pattern
+        const mapping = (env.GUMROAD_PRODUCT_URLS && JSON.parse(env.GUMROAD_PRODUCT_URLS)) || { prod_1: 'https://gumroad.com/l/example-product' };
+        const gumUrl = mapping[product] || mapping[product] || `https://gumroad.com/l/${product}`;
+
+        return new Response(JSON.stringify({ url: gumUrl }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+async function handleGumroadWebhook(request, env) {
+    try {
+        if (request.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+
+        const payloadText = await request.text();
+        let payload;
+        // If secret is provided, verify signature header or body parameter
+        const gumSig = request.headers.get('gumroad-signature') || request.headers.get('Gumroad-Signature') || null;
+
+        if (env.GUMROAD_SECRET && gumSig) {
+            // Verify using HMAC SHA1 over payloadText
+            const crypto = require('crypto');
+            const expected = crypto.createHmac('sha1', env.GUMROAD_SECRET).update(payloadText).digest('hex');
+            if (expected !== gumSig) {
+                return new Response(JSON.stringify({ error: 'Invalid gumroad signature' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
+            // If verified, parse JSON
+            payload = JSON.parse(payloadText);
+        } else {
+            // Fallback: try parse JSON (test-mode/demo)
+            try { payload = JSON.parse(payloadText); } catch (err) { return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
+        }
+
+        // Handle simplified sale event
+        if (payload.event_type === 'sale' || payload.event === 'sale') {
+            const sale = payload.sale || payload;
+            const userId = sale.custom_fields && sale.custom_fields.user_id ? sale.custom_fields.user_id : (sale.user_id || sale.email);
+            // For demo, treat purchase as granting pro access
+            if (userId) {
+                const store = await getBillingStore();
+                const subscription = { id: sale.id || `gum_${Math.random().toString(36).slice(2,8)}`, status: 'active', customer: sale.email || null, createdAt: new Date().toISOString() };
+                store.upsertSubscription(userId, subscription);
+                store.upsertCustomer(userId, { gumroadPurchaseId: sale.id || null, gumroadEmail: sale.email || null });
+                console.log('Gumroad: granted access for', userId);
+            }
+        }
+
+        return new Response(JSON.stringify({ received: true }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 }
 
