@@ -287,3 +287,4 @@ class TechStackSetupModule {
 }
 
 module.exports = TechStackSetupModule;
+module.exports.default = TechStackSetupModule;

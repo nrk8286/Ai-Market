@@ -314,3 +314,4 @@ class NicheDiscoveryModule {
 }
 
 module.exports = NicheDiscoveryModule;
+module.exports.default = NicheDiscoveryModule;

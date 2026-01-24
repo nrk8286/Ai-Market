@@ -122,3 +122,4 @@ module.exports = {
     ScalabilityModule,
     OptimizationModule
 };
+module.exports.default = module.exports;

@@ -155,6 +155,8 @@ To set up the AI Marketplace locally, follow these steps:
    npm test
    ```
 
+Note: This repository includes a lightweight Node-based test runner (`scripts/run-tests.js`). Use `npm test` to run it locally — it is intentionally simple so tests run reliably when the project is nested inside other workspaces or `node_modules` folders.
+
 ## Deploying to Cloudflare
 
 To deploy the AI Marketplace to Cloudflare, follow these steps:

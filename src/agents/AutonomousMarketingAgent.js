@@ -347,3 +347,4 @@ const {
 } = require('../modules/index');
 
 module.exports = AutonomousMarketingAgent;
+module.exports.default = AutonomousMarketingAgent;
