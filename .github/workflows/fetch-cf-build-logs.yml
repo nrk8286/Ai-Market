@@ -1,0 +1,46 @@
+name: Fetch Cloudflare Build Logs
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_url:
+        description: 'Cloudflare build details URL (e.g. https://dash.cloudflare.com/<account>/workers/services/<service>/production/builds/<build-id>)'
+        required: true
+
+jobs:
+  fetch-logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch build details
+        env:
+          CF_READ_TOKEN: ${{ secrets.CF_READ_TOKEN }}
+          BUILD_URL: ${{ github.event.inputs.build_url }}
+        run: |
+          set -e
+          echo "Parsing build URL: $BUILD_URL"
+          # Extract account, service, and build id from the URL
+          # Expected format: https://dash.cloudflare.com/<account>/workers/services/<service>/production/builds/<build-id>
+          ACCOUNT=$(echo "$BUILD_URL" | awk -F'/' '{for(i=1;i<=NF;i++){if($i=="dash.cloudflare.com"){print $(i+1); exit}}}')
+          SERVICE=$(echo "$BUILD_URL" | awk -F'/workers/services/' '{print $2}' | awk -F'/' '{print $1}')
+          BUILD_ID=$(echo "$BUILD_URL" | awk -F'/builds/' '{print $2}')
+          echo "Account: $ACCOUNT"; echo "Service: $SERVICE"; echo "Build ID: $BUILD_ID"
+
+          if [ -z "$ACCOUNT" ] || [ -z "$SERVICE" ] || [ -z "$BUILD_ID" ]; then
+            echo "Failed to parse build URL"; exit 1
+          fi
+
+          API_URL="https://api.cloudflare.com/client/v4/accounts/$ACCOUNT/workers/services/$SERVICE/builds/$BUILD_ID"
+          echo "Calling: $API_URL"
+
+          # Fetch build JSON
+          curl -sS -H "Authorization: Bearer $CF_READ_TOKEN" "$API_URL" -o build.json || true
+          echo "Build JSON saved to build.json"
+
+          # Save as artifact
+          mkdir -p out
+          jq . build.json > out/build.json || cp build.json out/build.json || true
+      - name: Upload build logs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cf-build-logs
+          path: out/build.json
