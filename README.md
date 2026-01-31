@@ -170,6 +170,29 @@ To set up the AI Marketplace locally, follow these steps:
 
 Note: This repository includes a lightweight Node-based test runner (`scripts/run-tests.js`). Use `npm test` to run it locally — it is intentionally simple so tests run reliably when the project is nested inside other workspaces or `node_modules` folders.
 
+Payments & Webhooks (Stripe)
+
+- Endpoints added:
+  - `POST /marketplace/checkout` — creates a demo checkout session for an item
+  - `POST /webhooks/stripe` — receives Stripe webhook events (verify `STRIPE_WEBHOOK_SECRET` in production)
+
+- Env vars to set: `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`
+
+Admin API
+
+- Simple token-protected admin API added for marketplace management:
+  - `GET /admin/items` — list items (requires `Authorization: Bearer <ADMIN_TOKEN>` header)
+  - `POST /admin/items` — add an item
+- Set `ADMIN_TOKEN` in your environment to enable admin access.
+
+Datadog Synthetic example
+
+- Example synthetic test file added at `datadog/synthetic_example.json`. If you use Datadog Synthetics, add `DD_API_KEY` and `DD_APP_KEY` as repo secrets and the Datadog workflow will run.
+
+Preview deploy (CI)
+
+- A new CI job `e2e-preview` performs a `wrangler publish --dry-run` to validate packaging and runs lightweight E2E scripts. This job is gated behind Cloudflare secrets (`CF_API_TOKEN`, `CF_ACCOUNT_ID`).
+
 ## Deploying to Cloudflare
 
 To deploy the AI Marketplace to Cloudflare, follow these steps:
