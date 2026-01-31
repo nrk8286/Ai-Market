@@ -1,16 +1,19 @@
-name = "ai-marketplace"
-main = "worker.js"
-compatibility_date = "2025-01-31"
-workers_dev = true
+# KV Namespace Bindings
 
-[vars]
-SITE_TITLE = "AI Marketplace"
-NODE_ENV = "production"
+[[kv-namespaces]]
+binding = "MY_KV_NAMESPACE"
+id = "YOUR_KV_NAMESPACE_ID"
 
-[env.production]
-name = "ai-marketplace-production"
-route = "searchenginepro.uk/*"
-zone_id = ""
+# Cloudflare Workers Configuration
+name = "my-worker"
+type = "javascript"
+account_id = "YOUR_ACCOUNT_ID"
+compatibility_date = "2026-01-31"
 
-[observability]
-enabled = true
+# Add your Worker code below
+
+export default {  
+    async fetch(request) {  
+        return new Response('Hello World!')  
+    }  
+}  
