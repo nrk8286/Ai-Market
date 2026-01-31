@@ -1,0 +1,11 @@
+# Single Page App Routing
+/*  /  200
+
+# API routes should not be redirected
+/api/*  :splat  200
+
+# Marketplace routes
+/marketplace/*  :splat  200
+
+# Admin routes
+/admin/*  :splat  200
