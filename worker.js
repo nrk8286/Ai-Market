@@ -165,18 +165,288 @@ function generateHomePage() {
         <meta name="description" content="AI-powered marketplace for innovative tools and services.">
         <meta name="keywords" content="AI, marketplace, tools, services, innovation">
         <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-            h1 { color: #0078D7; }
-            .content { margin: auto; width: 80%; text-align: left; }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            
+            header {
+                text-align: center;
+                color: white;
+                margin-bottom: 60px;
+                animation: slideDownFade 0.8s ease-out;
+            }
+            
+            h1 {
+                font-size: 3.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            }
+            
+            .subtitle {
+                font-size: 1.3em;
+                opacity: 0.95;
+            }
+            
+            .hero-icon {
+                font-size: 4em;
+                margin-bottom: 20px;
+                animation: float 3s ease-in-out infinite;
+            }
+            
+            .products-section {
+                margin-bottom: 50px;
+            }
+            
+            .section-title {
+                text-align: center;
+                color: white;
+                font-size: 2em;
+                margin-bottom: 40px;
+                animation: slideDownFade 0.8s ease-out 0.2s both;
+            }
+            
+            .products-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 30px;
+                margin-bottom: 40px;
+            }
+            
+            .product-card {
+                background: white;
+                border-radius: 12px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                transition: all 0.3s ease;
+                animation: slideUpFade 0.6s ease-out backwards;
+                cursor: pointer;
+            }
+            
+            .product-card:nth-child(1) { animation-delay: 0.1s; }
+            .product-card:nth-child(2) { animation-delay: 0.2s; }
+            .product-card:nth-child(3) { animation-delay: 0.3s; }
+            .product-card:nth-child(4) { animation-delay: 0.4s; }
+            
+            .product-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            }
+            
+            .product-icon {
+                font-size: 3em;
+                margin-bottom: 15px;
+                animation: bounce 2s infinite;
+            }
+            
+            .product-card:nth-child(2) .product-icon { animation-delay: 0.2s; }
+            .product-card:nth-child(3) .product-icon { animation-delay: 0.4s; }
+            .product-card:nth-child(4) .product-icon { animation-delay: 0.6s; }
+            
+            .product-name {
+                font-size: 1.5em;
+                color: #667eea;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+            
+            .product-price {
+                font-size: 1.8em;
+                color: #764ba2;
+                margin-bottom: 15px;
+            }
+            
+            .product-description {
+                color: #666;
+                margin-bottom: 20px;
+                line-height: 1.6;
+            }
+            
+            .cta-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px 30px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                border: none;
+                cursor: pointer;
+            }
+            
+            .cta-button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+            
+            .cta-button:active {
+                transform: scale(0.98);
+            }
+            
+            .view-all-btn {
+                display: block;
+                width: 200px;
+                margin: 30px auto;
+                padding: 15px;
+                background: white;
+                color: #667eea;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: bold;
+                text-align: center;
+                font-size: 1.1em;
+                transition: all 0.3s ease;
+                animation: slideUpFade 0.6s ease-out 0.5s both;
+            }
+            
+            .view-all-btn:hover {
+                background: #f0f0f0;
+                transform: translateY(-3px);
+            }
+            
+            nav {
+                background: rgba(255,255,255,0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 8px;
+                padding: 15px 30px;
+                display: flex;
+                justify-content: center;
+                gap: 30px;
+                animation: slideDownFade 0.8s ease-out 0.3s both;
+            }
+            
+            nav a {
+                color: white;
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+            
+            nav a:hover {
+                transform: scale(1.1);
+                text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            }
+            
+            @keyframes slideDownFade {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes slideUpFade {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0px);
+                }
+                50% {
+                    transform: translateY(-20px);
+                }
+            }
+            
+            @keyframes bounce {
+                0%, 100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+            
+            .footer {
+                text-align: center;
+                color: rgba(255,255,255,0.8);
+                margin-top: 50px;
+                padding-top: 30px;
+                border-top: 1px solid rgba(255,255,255,0.2);
+                animation: slideUpFade 0.6s ease-out 0.6s both;
+            }
         </style>
     </head>
     <body>
-        <h1>Welcome to the AI Marketplace</h1>
-        <div class="content">
-            <p>Discover and purchase AI-powered tools and services.</p>
-            <p>Click below to explore our marketplace:</p>
-            <a href="/marketplace/items">View Marketplace Items</a>
-            <p><a href="/about">About Us</a> | <a href="/contact">Contact Us</a></p>
+        <div class="container">
+            <header>
+                <div class="hero-icon">🚀</div>
+                <h1>AI Marketplace</h1>
+                <p class="subtitle">Discover AI-Powered Tools & Services</p>
+            </header>
+            
+            <div class="products-section">
+                <h2 class="section-title">Featured Products</h2>
+                <div class="products-grid">
+                    <div class="product-card">
+                        <div class="product-icon">🤖</div>
+                        <div class="product-name">AI Content Generator</div>
+                        <div class="product-price">$99</div>
+                        <div class="product-description">Create high-quality content automatically using advanced AI algorithms.</div>
+                        <button class="cta-button">Learn More</button>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-icon">🔍</div>
+                        <div class="product-name">SEO Optimization Tool</div>
+                        <div class="product-price">$149</div>
+                        <div class="product-description">Optimize your website for search engines with AI-powered insights.</div>
+                        <button class="cta-button">Learn More</button>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-icon">📊</div>
+                        <div class="product-name">Analytics Dashboard</div>
+                        <div class="product-price">$199</div>
+                        <div class="product-description">Get deep insights into your business metrics with real-time analytics.</div>
+                        <button class="cta-button">Learn More</button>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-icon">⚡</div>
+                        <div class="product-name">Automation Suite</div>
+                        <div class="product-price">$299</div>
+                        <div class="product-description">Automate workflows and save countless hours with intelligent automation.</div>
+                        <button class="cta-button">Learn More</button>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="/marketplace/items" class="view-all-btn">View All Products</a>
+            
+            <nav>
+                <a href="/about">About Us</a>
+                <a href="/pricing">Pricing</a>
+                <a href="/contact">Contact</a>
+            </nav>
+            
+            <div class="footer">
+                <p>&copy; 2026 AI Marketplace. All rights reserved.</p>
+            </div>
         </div>
     </body>
     </html>
@@ -194,16 +464,94 @@ function generateAboutPage() {
         <meta name="description" content="Learn more about our AI-powered marketplace and team.">
         <meta name="keywords" content="AI, marketplace, About Us, Team, AI-powered tools">
         <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-            h1 { color: #0078D7; }
-            .content { margin: auto; width: 80%; text-align: left; }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 40px 20px;
+            }
+            
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                padding: 50px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                animation: slideUpFade 0.8s ease-out;
+            }
+            
+            h1 {
+                color: #667eea;
+                font-size: 2.5em;
+                margin-bottom: 10px;
+            }
+            
+            .icon {
+                font-size: 3em;
+                margin-bottom: 20px;
+                animation: float 3s ease-in-out infinite;
+            }
+            
+            p {
+                color: #666;
+                font-size: 1.1em;
+                line-height: 1.8;
+                margin-bottom: 20px;
+            }
+            
+            .back-link {
+                display: inline-block;
+                margin-top: 30px;
+                padding: 12px 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+            
+            .back-link:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+            
+            @keyframes slideUpFade {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0px);
+                }
+                50% {
+                    transform: translateY(-20px);
+                }
+            }
         </style>
     </head>
     <body>
-        <h1>About Us</h1>
-        <div class="content">
+        <div class="container">
+            <div class="icon">👥</div>
+            <h1>About Us</h1>
             <p>We are a team of AI enthusiasts dedicated to creating the best AI-powered marketplace.</p>
-            <a href="/">Back to Home</a>
+            <p>Our mission is to democratize access to cutting-edge AI tools and services, making them available to businesses and individuals worldwide.</p>
+            <p>With a focus on innovation, quality, and customer satisfaction, we're building the future of AI-powered solutions.</p>
+            <a href="/" class="back-link">← Back to Home</a>
         </div>
     </body>
     </html>
@@ -221,16 +569,110 @@ function generateContactPage() {
         <meta name="description" content="Get in touch with us for any queries or support.">
         <meta name="keywords" content="AI, marketplace, Contact, Support, Queries">
         <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-            h1 { color: #0078D7; }
-            .content { margin: auto; width: 80%; text-align: left; }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 40px 20px;
+            }
+            
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                padding: 50px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                animation: slideUpFade 0.8s ease-out;
+            }
+            
+            h1 {
+                color: #667eea;
+                font-size: 2.5em;
+                margin-bottom: 10px;
+            }
+            
+            .icon {
+                font-size: 3em;
+                margin-bottom: 20px;
+                animation: float 3s ease-in-out infinite;
+            }
+            
+            p {
+                color: #666;
+                font-size: 1.1em;
+                line-height: 1.8;
+                margin-bottom: 20px;
+            }
+            
+            .contact-info {
+                background: #f5f5f5;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+            }
+            
+            .contact-item {
+                margin: 10px 0;
+                font-weight: 500;
+            }
+            
+            .back-link {
+                display: inline-block;
+                margin-top: 30px;
+                padding: 12px 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+            
+            .back-link:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+            
+            @keyframes slideUpFade {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0px);
+                }
+                50% {
+                    transform: translateY(-20px);
+                }
+            }
         </style>
     </head>
     <body>
-        <h1>Contact Us</h1>
-        <div class="content">
-            <p>If you have any questions, feel free to reach out to us at contact@ai-market.com.</p>
-            <a href="/">Back to Home</a>
+        <div class="container">
+            <div class="icon">📧</div>
+            <h1>Contact Us</h1>
+            <p>Have questions? We'd love to hear from you. Get in touch with our team!</p>
+            <div class="contact-info">
+                <div class="contact-item">📧 Email: contact@ai-market.com</div>
+                <div class="contact-item">💬 Support: support@ai-market.com</div>
+                <div class="contact-item">📱 Phone: +1 (555) 123-4567</div>
+            </div>
+            <p>We're here to help and answer any question you might have. Our team typically responds within 24 hours.</p>
+            <a href="/" class="back-link">← Back to Home</a>
         </div>
     </body>
     </html>
