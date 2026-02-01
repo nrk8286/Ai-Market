@@ -1,5 +1,4 @@
-import { createRequire } from 'module';
-const require = createRequire(typeof __filename === 'undefined' ? import.meta.url : __filename);
+import { fileURLToPath } from 'url';
 
 export default {
     async fetch(request, env) {
@@ -298,7 +297,7 @@ async function handleAutonomousAgent(request, env) {
             const userInput = await request.json();
             
             // Initialize the autonomous agent
-            const AutonomousMarketingAgent = require('./src/agents/AutonomousMarketingAgent.cjs');
+            const { default: AutonomousMarketingAgent } = await import('./src/agents/AutonomousMarketingAgent.cjs');
             const agent = new AutonomousMarketingAgent({
                 openaiApiKey: env.OPENAI_API_KEY,
                 paymentGatewayKey: env.PAYMENT_GATEWAY_API_KEY,
@@ -350,7 +349,7 @@ async function handleNicheDiscovery(request, env) {
         if (request.method === 'POST') {
             const userInput = await request.json();
             
-            const NicheDiscoveryModule = require('./src/modules/NicheDiscoveryModule.cjs');
+            const { default: NicheDiscoveryModule } = await import('./src/modules/NicheDiscoveryModule.cjs');
             const module = new NicheDiscoveryModule({ openaiApiKey: env.OPENAI_API_KEY });
             
             const result = await module.analyze(userInput);
@@ -380,7 +379,7 @@ async function handleKeywordResearch(request, env) {
         if (request.method === 'POST') {
             const selectedNiche = await request.json();
             
-            const KeywordResearchModule = require('./src/modules/KeywordResearchModule.cjs');
+            const { default: KeywordResearchModule } = await import('./src/modules/KeywordResearchModule.cjs');
             const module = new KeywordResearchModule({ openaiApiKey: env.OPENAI_API_KEY });
             
             const result = await module.generateStrategy(selectedNiche);
@@ -410,7 +409,7 @@ async function handleTechStack(request, env) {
         if (request.method === 'POST') {
             const params = await request.json();
             
-            const TechStackSetupModule = require('./src/modules/TechStackSetupModule.cjs');
+            const { default: TechStackSetupModule } = await import('./src/modules/TechStackSetupModule.cjs');
             const module = new TechStackSetupModule({ openaiApiKey: env.OPENAI_API_KEY });
             
             const result = await module.selectOptimalStack(params);
@@ -440,7 +439,7 @@ async function handleTechStack(request, env) {
 let productStore = null;
 async function getProductStore() {
     if (productStore) return productStore;
-    const mod = require('./src/services/ProductStore.cjs');
+    const mod = await import('./src/services/ProductStore.cjs');
     const ProductStore = mod.default || mod;
     productStore = new ProductStore({ useFile: true });
     return productStore;
@@ -466,7 +465,7 @@ async function handleCheckout(request, env) {
         const platformFee = Math.round(amount * (platformFeePct / 100));
 
         // If Stripe configured, use StripeClient to create PaymentIntent with transfer to vendor
-        const StripeClient = require('./src/services/StripeClient.cjs');
+        const { default: StripeClient } = await import('./src/services/StripeClient.cjs');
         const stripe = new StripeClient(env.STRIPE_SECRET_KEY || '');
 
         if (stripe.isAvailable()) {
@@ -486,7 +485,7 @@ async function handleCheckout(request, env) {
 let billingStore = null;
 async function getBillingStore() {
     if (billingStore) return billingStore;
-    const mod = require('./src/services/BillingStore.cjs');
+    const mod = await import('./src/services/BillingStore.cjs');
     const BillingStore = mod.default || mod;
     billingStore = new BillingStore({ useFile: true });
     return billingStore;
@@ -582,7 +581,7 @@ async function handleStripeWebhook(request, env) {
         let event = null;
 
         // Use StripeClient helper to verify when possible
-        const StripeClient = require('./src/services/StripeClient.cjs');
+        const { default: StripeClient } = await import('./src/services/StripeClient.cjs');
         const stripe = new StripeClient(env.STRIPE_SECRET_KEY || '');
         const sig = request.headers.get('stripe-signature') || request.headers.get('Stripe-Signature');
         try {
@@ -601,7 +600,7 @@ async function handleStripeWebhook(request, env) {
 
                 // If session has a customer id, use it; otherwise, attempt to create one via Stripe
                 let customerId = session.customer || session.customer_id || null;
-                const StripeClientWebhook = require('./src/services/StripeClient.cjs');
+                const { default: StripeClientWebhook } = await import('./src/services/StripeClient.cjs');
                 const stripeWebhook = new StripeClientWebhook(env.STRIPE_SECRET_KEY || '');
 
                 if (!customerId) {
@@ -652,7 +651,7 @@ async function handleGumroadCheckout(request, env) {
         if (!product) return new Response(JSON.stringify({ error: 'Missing product param' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 
         // Load config from ConfigStore (if available) or fall back to env
-        const ConfigStore = require('./src/services/ConfigStore.cjs');
+        const { default: ConfigStore } = await import('./src/services/ConfigStore.cjs');
         const configStore = new ConfigStore({ useFile: true });
         const gumConfig = configStore.get('gumroad') || {};
 
@@ -740,14 +739,14 @@ async function handleAdmin(request, env) {
         // Admin: GET/POST Gumroad config
         if (url.pathname === '/admin/gumroad/config') {
             if (request.method === 'GET') {
-                const ConfigStore = require('./src/services/ConfigStore.cjs');
+                const { default: ConfigStore } = await import('./src/services/ConfigStore.cjs');
                 const configStore = new ConfigStore({ useFile: true });
                 return new Response(JSON.stringify({ success: true, config: configStore.get('gumroad') || {} }), { headers: { 'Content-Type': 'application/json' } });
             }
 
             if (request.method === 'POST') {
                 const body = await request.json();
-                const ConfigStore = require('./src/services/ConfigStore.cjs');
+                const { default: ConfigStore } = await import('./src/services/ConfigStore.cjs');
                 const configStore = new ConfigStore({ useFile: true });
                 const existing = configStore.get('gumroad') || {};
                 const next = Object.assign({}, existing, body);
