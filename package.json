@@ -1,1 +1,53 @@
-{\n  "name": "ai-marketplace",\n  "version": "1.0.0",\n  "description": "AI-powered marketplace for innovative tools and services.",\n  "main": "worker.js",\n  "type": "module",\n  "scripts": {\n    "start": "wrangler dev",\n    "deploy": "wrangler publish",\n    "build": "echo 'Cloudflare Workers do not require a build step. Run: npm run deploy'",\n    "test": "node scripts/test.js",\n    "test:jest": "jest --runInBand",\n    "test:watch": "jest --watchAll",\n    "test:coverage": "jest --coverage",\n    "test:light": "node scripts/run-tests.js",\n    "test:e2e": "jest tests/e2e.test.js --runInBand",\n    "test:e2e:light": "node tests/e2e.script.js",\n    "test:e2e:wrangler": "node scripts/run-e2e-wrangler.js"\n  },\n  "dependencies": {\n    "dotenv": "^10.0.0",\n    "openai": "^6.16.0",\n    "stripe": "^8.174.0"\n  },\n  "devDependencies": {\n    "jest": "^29.6.1",\n    "wrangler": "^4.60.0"\n  },\n  "author": "nrk8286",\n  "license": "MIT",\n  "engines": {\n    "node": ">=20"\n  }\n}
+{
+	"name": "ai-marketplace",
+	"version": "1.0.0",
+	"description": "AI-powered marketplace for innovative tools and services.",
+	"main": "worker.js",
+	"type": "module",
+	"scripts": {
+		"start": "wrangler dev",
+		"deploy": "wrangler publish",
+		"build": "echo 'Cloudflare Workers do not require a build step. Run: npm run deploy'",
+		"test": "node scripts/test.js",
+		"test:jest": "jest --runInBand",
+		"test:watch": "jest --watchAll",
+		"test:coverage": "jest --coverage",
+		"test:light": "node scripts/run-tests.js",
+		"test:e2e": "jest tests/e2e.test.js --runInBand",
+		"test:e2e:light": "node tests/e2e.script.js",
+		"test:e2e:wrangler": "node scripts/run-e2e-wrangler.js"
+	},
+		"name": "ai-marketplace",
+		"version": "1.0.0",
+		"description": "AI-powered marketplace for innovative tools and services.",
+		"main": "worker.js",
+		"type": "module",
+		"scripts": {
+			"start": "wrangler dev",
+			"deploy": "wrangler publish",
+			"build": "echo 'Cloudflare Workers do not require a build step. Run: npm run deploy'",
+			"test": "node scripts/test.js",
+			"test:jest": "jest --runInBand",
+			"test:watch": "jest --watchAll",
+			"test:coverage": "jest --coverage",
+			"test:light": "node scripts/run-tests.js",
+			"test:e2e": "jest tests/e2e.test.js --runInBand",
+			"test:e2e:light": "node tests/e2e.script.js",
+			"test:e2e:wrangler": "node scripts/run-e2e-wrangler.js"
+		},
+		"dependencies": {
+			"dotenv": "^10.0.0",
+			"openai": "^6.16.0",
+			"stripe": "^8.174.0"
+		},
+		"devDependencies": {
+			"jest": "^29.6.1",
+			"wrangler": "^4.60.0"
+		},
+		"author": "nrk8286",
+		"license": "MIT",
+		"engines": {
+			"node": ">=20"
+		}
+
+	}

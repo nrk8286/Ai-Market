@@ -1,6 +1,5 @@
-const { spawnSync } = require('child_process');
+import { spawnSync } from 'child_process';
 
-// If a specific Jest test file is requested (e.g., E2E wrangler tests), run it directly
 const requestedTestFile = process.env.JEST_TEST_FILE;
 if (requestedTestFile) {
   const run = spawnSync('npx', ['jest', requestedTestFile, '--runInBand'], { stdio: 'inherit', env: process.env });

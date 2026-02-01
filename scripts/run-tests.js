@@ -1,10 +1,13 @@
-const assert = require('assert');
+import assert from 'assert';
+import { createRequire } from 'module';
 
-(async () => {
+const require = createRequire(import.meta.url);
+
+const run = async () => {
   console.log('Running lightweight tests...');
 
-  // NicheDiscoveryModule
-  const NicheDiscoveryModule = require('../src/modules/NicheDiscoveryModule');
+  // NicheDiscoveryModule (require CommonJS module)
+  const NicheDiscoveryModule = require('../src/modules/NicheDiscoveryModule.cjs');
   const nd = new NicheDiscoveryModule({ openaiApiKey: null });
   const ndResult = await nd.analyze({ userSkills: ['JS'], userInterests: ['AI'], availableResources: { budget: 'low' } });
 
@@ -12,7 +15,7 @@ const assert = require('assert');
   console.log('✓ NicheDiscoveryModule.analyze OK');
 
   // KeywordResearchModule
-  const KeywordResearchModule = require('../src/modules/KeywordResearchModule');
+  const KeywordResearchModule = require('../src/modules/KeywordResearchModule.cjs');
   const kr = new KeywordResearchModule({ openaiApiKey: null });
   const krResult = await kr.generateStrategy({ name: 'AI Tools', category: 'ai-tools', trends: ['automation'] });
 
@@ -20,7 +23,7 @@ const assert = require('assert');
   console.log('✓ KeywordResearchModule.generateStrategy OK');
 
   // TechStackSetupModule
-  const TechStackSetupModule = require('../src/modules/TechStackSetupModule');
+  const TechStackSetupModule = require('../src/modules/TechStackSetupModule.cjs');
   const ts = new TechStackSetupModule({});
   const tsResult = await ts.selectOptimalStack({ niche: { name: 'AI Tools', validation: { monetization: { potential: 80000 } } }, requirements: ['automation'] });
 
@@ -31,7 +34,7 @@ const assert = require('assert');
 
   // Run integration tests (script runner)
   try {
-    require('../tests/integration.script');
+    require('../tests/integration.script.cjs');
   } catch (err) {
     console.error('Integration tests failed:', err);
     process.exit(1);
@@ -39,9 +42,11 @@ const assert = require('assert');
 
   // Run E2E script (Miniflare) as a fallback when Jest E2E is not available
   try {
-    require('../tests/e2e.script');
+    require('../tests/e2e.script.cjs');
   } catch (err) {
     console.error('E2E script runner failed:', err);
     process.exit(1);
   }
-})();
+};
+
+run();
