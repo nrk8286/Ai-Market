@@ -1,0 +1,21 @@
+# Robots.txt for AI Marketplace
+# https://ai-marketplace.com
+
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /pricing
+Allow: /marketplace/items
+
+# Disallow admin and API endpoints
+Disallow: /admin/
+Disallow: /api/
+Disallow: /billing/
+Disallow: /webhooks/
+
+# Sitemap location
+Sitemap: https://ai-marketplace.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

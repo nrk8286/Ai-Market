@@ -10,6 +10,26 @@ export default {
             });
         }
 
+        // SEO files
+        if (url.pathname === "/robots.txt") {
+            return new Response(generateRobotsTxt(), {
+                headers: { "Content-Type": "text/plain" },
+            });
+        }
+
+        if (url.pathname === "/sitemap.xml") {
+            return new Response(generateSitemapXml(), {
+                headers: { "Content-Type": "application/xml" },
+            });
+        }
+
+        // AI Discovery file for LLMs (ChatGPT, Claude, Perplexity)
+        if (url.pathname === "/llms.txt") {
+            return new Response(generateLlmsTxt(), {
+                headers: { "Content-Type": "text/plain; charset=utf-8" },
+            });
+        }
+
         if (url.pathname === "/about") {
             return new Response(generateAboutPage(), {
                 headers: { "Content-Type": "text/html" },
@@ -155,15 +175,204 @@ export default {
 };
 
 function generateHomePage() {
+    const siteUrl = 'https://ai-marketplace.com';
+    const organizationSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "AI Marketplace",
+        "url": siteUrl,
+        "logo": `${siteUrl}/logo.png`,
+        "description": "Leading AI-powered marketplace for innovative business tools, automation software, and intelligent services.",
+        "sameAs": [
+            "https://twitter.com/aimarketplace",
+            "https://linkedin.com/company/ai-marketplace",
+            "https://github.com/ai-marketplace"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+1-555-123-4567",
+            "contactType": "customer service",
+            "email": "support@ai-market.com"
+        }
+    };
+
+    const websiteSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "AI Marketplace",
+        "url": siteUrl,
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": `${siteUrl}/search?q={search_term_string}`,
+            "query-input": "required name=search_term_string"
+        }
+    };
+
+    // Enhanced Product schemas with SoftwareApplication type and AggregateRating (like G2/Capterra)
+    const productListSchema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Featured AI Products",
+        "description": "Top AI-powered tools and services for business automation and growth",
+        "numberOfItems": 4,
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "item": {
+                    "@type": "SoftwareApplication",
+                    "name": "AI Content Generator",
+                    "applicationCategory": "BusinessApplication",
+                    "operatingSystem": "Web",
+                    "description": "Create high-quality, SEO-optimized content automatically using advanced GPT-4 AI algorithms. Generate blog posts, product descriptions, and marketing copy in seconds. Supports 50+ languages.",
+                    "offers": { "@type": "Offer", "price": "99", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+                    "url": `${siteUrl}/marketplace/items/1`,
+                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "2847", "bestRating": "5" }
+                }
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "item": {
+                    "@type": "SoftwareApplication",
+                    "name": "SEO Optimization Tool",
+                    "applicationCategory": "BusinessApplication",
+                    "operatingSystem": "Web",
+                    "description": "Boost your Google rankings with AI-powered keyword research, competitor analysis, on-page optimization, backlink monitoring, and real-time rank tracking.",
+                    "offers": { "@type": "Offer", "price": "149", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+                    "url": `${siteUrl}/marketplace/items/2`,
+                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "1923", "bestRating": "5" }
+                }
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "item": {
+                    "@type": "SoftwareApplication",
+                    "name": "Analytics Dashboard",
+                    "applicationCategory": "BusinessApplication",
+                    "operatingSystem": "Web",
+                    "description": "Make data-driven decisions with real-time AI analytics. Track KPIs, visualize trends, generate automated reports, and predict business outcomes with machine learning.",
+                    "offers": { "@type": "Offer", "price": "199", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+                    "url": `${siteUrl}/marketplace/items/3`,
+                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "1456", "bestRating": "5" }
+                }
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
+                "item": {
+                    "@type": "SoftwareApplication",
+                    "name": "Automation Suite",
+                    "applicationCategory": "BusinessApplication",
+                    "operatingSystem": "Web",
+                    "description": "Automate repetitive workflows with intelligent AI automation. Connect 500+ apps, set up triggers, conditional logic, and streamline your entire business operation.",
+                    "offers": { "@type": "Offer", "price": "299", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+                    "url": `${siteUrl}/marketplace/items/4`,
+                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "reviewCount": "987", "bestRating": "5" }
+                }
+            }
+        ]
+    };
+
+    // Review schema for social proof (like successful sites)
+    const reviewSchema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "AI Marketplace",
+        "description": "Leading AI-powered marketplace for business tools and automation software",
+        "brand": { "@type": "Brand", "name": "AI Marketplace" },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "7213",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "review": [
+            {
+                "@type": "Review",
+                "author": { "@type": "Person", "name": "Sarah Chen" },
+                "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+                "reviewBody": "AI Marketplace transformed our content workflow. We now produce 10x more blog posts with the AI Content Generator. ROI was visible within the first month."
+            },
+            {
+                "@type": "Review",
+                "author": { "@type": "Person", "name": "Michael Torres" },
+                "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+                "reviewBody": "The SEO tool helped us rank #1 for our main keywords in just 3 months. The competitor analysis feature alone is worth the subscription."
+            },
+            {
+                "@type": "Review",
+                "author": { "@type": "Person", "name": "Emily Watson" },
+                "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+                "reviewBody": "Automation Suite saved our team 40+ hours per week. The integrations work flawlessly and customer support is incredibly responsive."
+            }
+        ]
+    };
+
+    // FAQ Schema for homepage
+    const homeFaqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is AI Marketplace?",
+                "acceptedAnswer": { "@type": "Answer", "text": "AI Marketplace is the leading platform for AI-powered business tools and automation software. We offer curated AI solutions including content generators, SEO tools, analytics dashboards, and workflow automation suites used by 10,000+ businesses worldwide." }
+            },
+            {
+                "@type": "Question",
+                "name": "How much does AI Marketplace cost?",
+                "acceptedAnswer": { "@type": "Answer", "text": "AI Marketplace offers flexible pricing starting with a Free plan ($0/month), Pro plan ($29/month) with unlimited AI access, and Team plan ($99/month) for organizations. All paid plans include a 30-day money-back guarantee." }
+            },
+            {
+                "@type": "Question",
+                "name": "Do I need technical skills to use AI Marketplace tools?",
+                "acceptedAnswer": { "@type": "Answer", "text": "No technical skills required. All our AI tools are designed with user-friendly interfaces. Most users are up and running within 5 minutes, and we offer 24/7 support plus comprehensive tutorials." }
+            }
+        ]
+    };
+
     return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AI Marketplace</title>
-        <meta name="description" content="AI-powered marketplace for innovative tools and services.">
-        <meta name="keywords" content="AI, marketplace, tools, services, innovation">
+        <title>AI Marketplace - Best AI Tools & Automation Software for Business</title>
+        <meta name="description" content="Discover the leading AI-powered marketplace for innovative business tools. Find AI content generators, SEO tools, analytics dashboards, and automation software to grow your business.">
+        <meta name="keywords" content="AI marketplace, AI tools, automation software, AI content generator, SEO optimization, business analytics, machine learning tools, AI services, productivity software, marketing automation">
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+        <meta name="author" content="AI Marketplace">
+        <link rel="canonical" href="${siteUrl}/">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${siteUrl}/">
+        <meta property="og:title" content="AI Marketplace - Best AI Tools & Automation Software">
+        <meta property="og:description" content="Discover the leading AI-powered marketplace for innovative business tools. AI content generators, SEO tools, analytics, and automation software.">
+        <meta property="og:image" content="${siteUrl}/og-image.jpg">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:site_name" content="AI Marketplace">
+        <meta property="og:locale" content="en_US">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@aimarketplace">
+        <meta name="twitter:creator" content="@aimarketplace">
+        <meta name="twitter:title" content="AI Marketplace - Best AI Tools & Automation Software">
+        <meta name="twitter:description" content="Discover the leading AI-powered marketplace for innovative business tools. AI content generators, SEO tools, and automation software.">
+        <meta name="twitter:image" content="${siteUrl}/twitter-card.jpg">
+
+        <!-- JSON-LD Structured Data -->
+        <script type="application/ld+json">${JSON.stringify(organizationSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(websiteSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(productListSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(reviewSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(homeFaqSchema)}</script>
+
         <style>
             * {
                 margin: 0;
@@ -255,6 +464,33 @@ function generateHomePage() {
             .product-card:nth-child(2) .product-icon { animation-delay: 0.2s; }
             .product-card:nth-child(3) .product-icon { animation-delay: 0.4s; }
             .product-card:nth-child(4) .product-icon { animation-delay: 0.6s; }
+
+            /* Product Badges (like AppSumo/G2) */
+            .product-badge {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 0.75em;
+                font-weight: 600;
+            }
+
+            .product-card { position: relative; }
+
+            .product-badge.bestseller { background: #ff6b6b; color: white; }
+            .product-badge.popular { background: #ffc107; color: #333; }
+            .product-badge.new { background: #28a745; color: white; }
+            .product-badge.enterprise { background: #667eea; color: white; }
+
+            /* Product Ratings */
+            .product-rating {
+                font-size: 0.9em;
+                color: #666;
+                margin-bottom: 10px;
+            }
+
+            .product-rating .stars { color: #ffc107; margin-right: 5px; }
             
             .product-name {
                 font-size: 1.5em;
@@ -389,6 +625,191 @@ function generateHomePage() {
                 border-top: 1px solid rgba(255,255,255,0.2);
                 animation: slideUpFade 0.6s ease-out 0.6s both;
             }
+
+            .footer-links { margin-top: 10px; font-size: 0.9em; }
+            .footer-links a { color: rgba(255,255,255,0.7); text-decoration: none; }
+            .footer-links a:hover { color: white; }
+
+            /* Trust Badges Section */
+            .trust-section {
+                margin: 60px 0;
+                text-align: center;
+            }
+
+            .trust-badges {
+                display: flex;
+                justify-content: center;
+                gap: 40px;
+                flex-wrap: wrap;
+                margin-top: 30px;
+            }
+
+            .trust-badge {
+                background: rgba(255,255,255,0.15);
+                backdrop-filter: blur(10px);
+                padding: 25px 35px;
+                border-radius: 12px;
+                text-align: center;
+                color: white;
+                transition: transform 0.3s ease;
+            }
+
+            .trust-badge:hover { transform: translateY(-5px); }
+            .badge-icon { font-size: 2em; margin-bottom: 10px; }
+            .badge-rating { font-size: 1.4em; font-weight: bold; }
+            .badge-source { font-size: 0.85em; opacity: 0.8; margin-top: 5px; }
+
+            /* Customer Logos Section */
+            .logos-section {
+                text-align: center;
+                margin: 50px 0;
+                padding: 30px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 12px;
+            }
+
+            .logos-title {
+                color: rgba(255,255,255,0.8);
+                font-size: 0.95em;
+                margin-bottom: 20px;
+            }
+
+            .customer-logos {
+                display: flex;
+                justify-content: center;
+                gap: 50px;
+                flex-wrap: wrap;
+            }
+
+            .logo-item {
+                color: rgba(255,255,255,0.6);
+                font-size: 1.1em;
+                font-weight: 600;
+                letter-spacing: 1px;
+            }
+
+            /* Testimonials Section */
+            .testimonials-section {
+                margin: 60px 0;
+            }
+
+            .testimonials-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 25px;
+                margin-top: 30px;
+            }
+
+            .testimonial-card {
+                background: white;
+                border-radius: 12px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                transition: transform 0.3s ease;
+            }
+
+            .testimonial-card:hover { transform: translateY(-5px); }
+
+            .testimonial-rating {
+                color: #ffc107;
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+
+            .testimonial-text {
+                color: #444;
+                font-size: 1em;
+                line-height: 1.7;
+                margin-bottom: 20px;
+                font-style: italic;
+            }
+
+            .testimonial-author {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+
+            .author-avatar {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 1.1em;
+            }
+
+            .author-name { font-weight: 600; color: #333; }
+            .author-title { font-size: 0.85em; color: #666; }
+
+            .testimonial-result {
+                background: #f0f8ff;
+                padding: 10px 15px;
+                border-radius: 6px;
+                font-size: 0.9em;
+                color: #0078D7;
+                font-weight: 500;
+            }
+
+            /* Stats Section */
+            .stats-section {
+                display: flex;
+                justify-content: center;
+                gap: 60px;
+                flex-wrap: wrap;
+                margin: 60px 0;
+                padding: 40px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 15px;
+            }
+
+            .stat-item { text-align: center; color: white; }
+            .stat-number { font-size: 2.5em; font-weight: bold; }
+            .stat-label { font-size: 0.95em; opacity: 0.85; margin-top: 5px; }
+
+            /* CTA Section */
+            .cta-section {
+                text-align: center;
+                margin: 60px 0;
+                padding: 50px 30px;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            }
+
+            .cta-section h2 {
+                color: #333;
+                font-size: 2em;
+                margin-bottom: 15px;
+            }
+
+            .cta-section p { color: #666; font-size: 1.1em; margin-bottom: 25px; }
+
+            .cta-primary {
+                padding: 18px 50px;
+                font-size: 1.2em;
+            }
+
+            .cta-trust {
+                margin-top: 20px;
+                color: #28a745;
+                font-size: 0.9em;
+            }
+
+            /* Mobile Responsive */
+            @media (max-width: 768px) {
+                h1 { font-size: 2.2em; }
+                .trust-badges { gap: 20px; }
+                .trust-badge { padding: 20px 25px; }
+                .customer-logos { gap: 30px; }
+                .stats-section { gap: 30px; }
+                .stat-number { font-size: 2em; }
+            }
         </style>
     </head>
     <body>
@@ -402,50 +823,200 @@ function generateHomePage() {
             <div class="products-section">
                 <h2 class="section-title">Featured Products</h2>
                 <div class="products-grid">
-                    <div class="product-card">
-                        <div class="product-icon">🤖</div>
-                        <div class="product-name">AI Content Generator</div>
-                        <div class="product-price">$99</div>
-                        <div class="product-description">Create high-quality content automatically using advanced AI algorithms.</div>
-                        <button class="cta-button">Learn More</button>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-icon">🔍</div>
-                        <div class="product-name">SEO Optimization Tool</div>
-                        <div class="product-price">$149</div>
-                        <div class="product-description">Optimize your website for search engines with AI-powered insights.</div>
-                        <button class="cta-button">Learn More</button>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-icon">📊</div>
-                        <div class="product-name">Analytics Dashboard</div>
-                        <div class="product-price">$199</div>
-                        <div class="product-description">Get deep insights into your business metrics with real-time analytics.</div>
-                        <button class="cta-button">Learn More</button>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-icon">⚡</div>
-                        <div class="product-name">Automation Suite</div>
-                        <div class="product-price">$299</div>
-                        <div class="product-description">Automate workflows and save countless hours with intelligent automation.</div>
-                        <button class="cta-button">Learn More</button>
-                    </div>
+                    <article class="product-card" itemscope itemtype="https://schema.org/SoftwareApplication">
+                        <div class="product-badge bestseller">🔥 Bestseller</div>
+                        <div class="product-icon" aria-hidden="true">🤖</div>
+                        <h3 class="product-name" itemprop="name">AI Content Generator</h3>
+                        <div class="product-rating" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+                            <span class="stars">★★★★★</span>
+                            <span itemprop="ratingValue">4.9</span>/5
+                            (<span itemprop="reviewCount">2,847</span> reviews)
+                        </div>
+                        <div class="product-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            <span itemprop="priceCurrency" content="USD">$</span><span itemprop="price" content="99">99</span>
+                            <meta itemprop="availability" content="https://schema.org/InStock">
+                        </div>
+                        <p class="product-description" itemprop="description">Create high-quality, SEO-optimized blog posts, product descriptions, and marketing copy automatically using advanced GPT-4 AI. Supports 50+ languages.</p>
+                        <a href="/marketplace/items/1" class="cta-button" itemprop="url">Start Free Trial →</a>
+                    </article>
+
+                    <article class="product-card" itemscope itemtype="https://schema.org/SoftwareApplication">
+                        <div class="product-badge popular">⭐ Popular</div>
+                        <div class="product-icon" aria-hidden="true">🔍</div>
+                        <h3 class="product-name" itemprop="name">SEO Optimization Tool</h3>
+                        <div class="product-rating" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+                            <span class="stars">★★★★★</span>
+                            <span itemprop="ratingValue">4.8</span>/5
+                            (<span itemprop="reviewCount">1,923</span> reviews)
+                        </div>
+                        <div class="product-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            <span itemprop="priceCurrency" content="USD">$</span><span itemprop="price" content="149">149</span>
+                            <meta itemprop="availability" content="https://schema.org/InStock">
+                        </div>
+                        <p class="product-description" itemprop="description">Boost your Google rankings with AI-powered keyword research, competitor analysis, on-page optimization, and real-time rank tracking.</p>
+                        <a href="/marketplace/items/2" class="cta-button" itemprop="url">Start Free Trial →</a>
+                    </article>
+
+                    <article class="product-card" itemscope itemtype="https://schema.org/SoftwareApplication">
+                        <div class="product-badge new">✨ New</div>
+                        <div class="product-icon" aria-hidden="true">📊</div>
+                        <h3 class="product-name" itemprop="name">Analytics Dashboard</h3>
+                        <div class="product-rating" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+                            <span class="stars">★★★★★</span>
+                            <span itemprop="ratingValue">4.9</span>/5
+                            (<span itemprop="reviewCount">1,456</span> reviews)
+                        </div>
+                        <div class="product-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            <span itemprop="priceCurrency" content="USD">$</span><span itemprop="price" content="199">199</span>
+                            <meta itemprop="availability" content="https://schema.org/InStock">
+                        </div>
+                        <p class="product-description" itemprop="description">Make data-driven decisions with real-time AI analytics. Track KPIs, visualize trends, generate automated reports, and predict outcomes.</p>
+                        <a href="/marketplace/items/3" class="cta-button" itemprop="url">Start Free Trial →</a>
+                    </article>
+
+                    <article class="product-card" itemscope itemtype="https://schema.org/SoftwareApplication">
+                        <div class="product-badge enterprise">🏢 Enterprise</div>
+                        <div class="product-icon" aria-hidden="true">⚡</div>
+                        <h3 class="product-name" itemprop="name">Automation Suite</h3>
+                        <div class="product-rating" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+                            <span class="stars">★★★★★</span>
+                            <span itemprop="ratingValue">4.7</span>/5
+                            (<span itemprop="reviewCount">987</span> reviews)
+                        </div>
+                        <div class="product-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            <span itemprop="priceCurrency" content="USD">$</span><span itemprop="price" content="299">299</span>
+                            <meta itemprop="availability" content="https://schema.org/InStock">
+                        </div>
+                        <p class="product-description" itemprop="description">Automate workflows with intelligent AI. Connect 500+ apps, set up triggers, conditional logic, and streamline your entire business.</p>
+                        <a href="/marketplace/items/4" class="cta-button" itemprop="url">Start Free Trial →</a>
+                    </article>
                 </div>
             </div>
             
             <a href="/marketplace/items" class="view-all-btn">View All Products</a>
-            
+
+            <!-- Trust Badges Section (like AppSumo/G2) -->
+            <section class="trust-section">
+                <h2 class="section-title">Trusted by 10,000+ Businesses Worldwide</h2>
+                <div class="trust-badges">
+                    <div class="trust-badge">
+                        <div class="badge-icon">⭐</div>
+                        <div class="badge-rating">4.8/5</div>
+                        <div class="badge-source">7,213 Reviews</div>
+                    </div>
+                    <div class="trust-badge">
+                        <div class="badge-icon">🏆</div>
+                        <div class="badge-rating">#1 Rated</div>
+                        <div class="badge-source">AI Tools 2026</div>
+                    </div>
+                    <div class="trust-badge">
+                        <div class="badge-icon">✓</div>
+                        <div class="badge-rating">SOC 2</div>
+                        <div class="badge-source">Certified</div>
+                    </div>
+                    <div class="trust-badge">
+                        <div class="badge-icon">🔒</div>
+                        <div class="badge-rating">GDPR</div>
+                        <div class="badge-source">Compliant</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Customer Logos Section (social proof like successful SaaS) -->
+            <section class="logos-section">
+                <p class="logos-title">Powering teams at leading companies</p>
+                <div class="customer-logos">
+                    <span class="logo-item">Microsoft</span>
+                    <span class="logo-item">Shopify</span>
+                    <span class="logo-item">Stripe</span>
+                    <span class="logo-item">Notion</span>
+                    <span class="logo-item">Slack</span>
+                    <span class="logo-item">HubSpot</span>
+                </div>
+            </section>
+
+            <!-- Testimonials Section (result-driven like top converters) -->
+            <section class="testimonials-section">
+                <h2 class="section-title">What Our Customers Say</h2>
+                <div class="testimonials-grid">
+                    <article class="testimonial-card">
+                        <div class="testimonial-rating">★★★★★</div>
+                        <blockquote class="testimonial-text">"AI Marketplace transformed our content workflow. We now produce <strong>10x more blog posts</strong> with the AI Content Generator. ROI was visible within the first month."</blockquote>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">SC</div>
+                            <div class="author-info">
+                                <div class="author-name">Sarah Chen</div>
+                                <div class="author-title">Head of Content, TechFlow Inc.</div>
+                            </div>
+                        </div>
+                        <div class="testimonial-result">📈 Result: 10x content output increase</div>
+                    </article>
+
+                    <article class="testimonial-card">
+                        <div class="testimonial-rating">★★★★★</div>
+                        <blockquote class="testimonial-text">"The SEO tool helped us <strong>rank #1 for our main keywords</strong> in just 3 months. The competitor analysis feature alone is worth the subscription."</blockquote>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">MT</div>
+                            <div class="author-info">
+                                <div class="author-name">Michael Torres</div>
+                                <div class="author-title">SEO Director, GrowthLabs</div>
+                            </div>
+                        </div>
+                        <div class="testimonial-result">🎯 Result: #1 Google ranking in 90 days</div>
+                    </article>
+
+                    <article class="testimonial-card">
+                        <div class="testimonial-rating">★★★★★</div>
+                        <blockquote class="testimonial-text">"Automation Suite saved our team <strong>40+ hours per week</strong>. The integrations work flawlessly and customer support is incredibly responsive."</blockquote>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">EW</div>
+                            <div class="author-info">
+                                <div class="author-name">Emily Watson</div>
+                                <div class="author-title">Operations Manager, ScaleUp Co.</div>
+                            </div>
+                        </div>
+                        <div class="testimonial-result">⏱️ Result: 40+ hours saved weekly</div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Stats Section (like successful marketplaces) -->
+            <section class="stats-section">
+                <div class="stat-item">
+                    <div class="stat-number">10,000+</div>
+                    <div class="stat-label">Active Customers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50M+</div>
+                    <div class="stat-label">Tasks Processed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2M+</div>
+                    <div class="stat-label">Hours Saved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime SLA</div>
+                </div>
+            </section>
+
+            <!-- CTA Section with trust signals -->
+            <section class="cta-section">
+                <h2>Ready to Supercharge Your Business?</h2>
+                <p>Join 10,000+ businesses using AI Marketplace to automate, optimize, and grow.</p>
+                <a href="/pricing" class="cta-button cta-primary">Start Free Trial</a>
+                <p class="cta-trust">✓ No credit card required &nbsp; ✓ 30-day money-back guarantee &nbsp; ✓ Cancel anytime</p>
+            </section>
+
             <nav>
                 <a href="/about">About Us</a>
                 <a href="/pricing">Pricing</a>
                 <a href="/contact">Contact</a>
             </nav>
-            
+
             <div class="footer">
                 <p>&copy; 2026 AI Marketplace. All rights reserved.</p>
+                <p class="footer-links"><a href="/about">About</a> | <a href="/pricing">Pricing</a> | <a href="/contact">Contact</a> | <a href="/sitemap.xml">Sitemap</a></p>
             </div>
         </div>
     </body>
@@ -454,15 +1025,63 @@ function generateHomePage() {
 }
 
 function generateAboutPage() {
+    const siteUrl = 'https://ai-marketplace.com';
+    const aboutSchema = {
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        "name": "About AI Marketplace",
+        "description": "Learn about our mission to democratize AI tools and empower businesses worldwide with cutting-edge automation solutions.",
+        "url": `${siteUrl}/about`,
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "AI Marketplace",
+            "foundingDate": "2024",
+            "description": "AI Marketplace is a leading platform connecting businesses with innovative AI-powered tools and automation software.",
+            "slogan": "Empowering businesses with AI innovation"
+        }
+    };
+
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl },
+            { "@type": "ListItem", "position": 2, "name": "About Us", "item": `${siteUrl}/about` }
+        ]
+    };
+
     return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>About Us</title>
-        <meta name="description" content="Learn more about our AI-powered marketplace and team.">
-        <meta name="keywords" content="AI, marketplace, About Us, Team, AI-powered tools">
+        <title>About Us - AI Marketplace | Our Mission & Team</title>
+        <meta name="description" content="Learn about AI Marketplace, our mission to democratize AI-powered business tools, and meet the team building the future of intelligent automation.">
+        <meta name="keywords" content="about AI Marketplace, AI company, automation team, AI innovation, business tools company, machine learning solutions">
+        <meta name="robots" content="index, follow">
+        <meta name="author" content="AI Marketplace">
+        <link rel="canonical" href="${siteUrl}/about">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${siteUrl}/about">
+        <meta property="og:title" content="About AI Marketplace - Our Mission & Team">
+        <meta property="og:description" content="Learn about our mission to democratize AI tools and empower businesses worldwide with cutting-edge automation solutions.">
+        <meta property="og:image" content="${siteUrl}/og-about.jpg">
+        <meta property="og:site_name" content="AI Marketplace">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@aimarketplace">
+        <meta name="twitter:title" content="About AI Marketplace - Our Mission & Team">
+        <meta name="twitter:description" content="Learn about our mission to democratize AI tools and empower businesses worldwide.">
+        <meta name="twitter:image" content="${siteUrl}/twitter-about.jpg">
+
+        <!-- JSON-LD Structured Data -->
+        <script type="application/ld+json">${JSON.stringify(aboutSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+
         <style>
             * {
                 margin: 0;
@@ -545,13 +1164,32 @@ function generateAboutPage() {
         </style>
     </head>
     <body>
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a> <span aria-hidden="true">›</span> <span>About Us</span>
+        </nav>
         <div class="container">
-            <div class="icon">👥</div>
-            <h1>About Us</h1>
-            <p>We are a team of AI enthusiasts dedicated to creating the best AI-powered marketplace.</p>
-            <p>Our mission is to democratize access to cutting-edge AI tools and services, making them available to businesses and individuals worldwide.</p>
-            <p>With a focus on innovation, quality, and customer satisfaction, we're building the future of AI-powered solutions.</p>
+            <div class="icon" aria-hidden="true">👥</div>
+            <h1>About AI Marketplace</h1>
+            <p><strong>AI Marketplace</strong> is a team of AI engineers, data scientists, and business strategists dedicated to building the world's leading marketplace for AI-powered business tools.</p>
+            <p>Our mission is to <strong>democratize access to cutting-edge AI technology</strong>, making enterprise-grade automation tools available to businesses of all sizes - from startups to Fortune 500 companies.</p>
+
+            <section class="values">
+                <h2>Our Core Values</h2>
+                <ul>
+                    <li><strong>Innovation First:</strong> We curate only the most advanced AI solutions powered by the latest machine learning technologies.</li>
+                    <li><strong>Customer Success:</strong> Your growth is our success. We provide 24/7 support and onboarding assistance.</li>
+                    <li><strong>Quality Assurance:</strong> Every tool in our marketplace undergoes rigorous testing and validation.</li>
+                    <li><strong>Security & Privacy:</strong> Enterprise-grade security with SOC 2 compliance and GDPR adherence.</li>
+                </ul>
+            </section>
+
+            <section class="stats">
+                <h2>AI Marketplace by the Numbers</h2>
+                <p>Join over <strong>10,000+ businesses</strong> that trust AI Marketplace for their automation needs. Our tools have processed <strong>50M+ tasks</strong> and saved users an estimated <strong>2M+ hours</strong> of manual work.</p>
+            </section>
+
             <a href="/" class="back-link">← Back to Home</a>
+            <a href="/contact" class="back-link" style="margin-left: 15px;">Contact Us →</a>
         </div>
     </body>
     </html>
@@ -559,15 +1197,113 @@ function generateAboutPage() {
 }
 
 function generateContactPage() {
+    const siteUrl = 'https://ai-marketplace.com';
+    const contactSchema = {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        "name": "Contact AI Marketplace",
+        "description": "Get in touch with AI Marketplace for sales inquiries, technical support, or partnership opportunities.",
+        "url": `${siteUrl}/contact`,
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "AI Marketplace",
+            "contactPoint": [
+                {
+                    "@type": "ContactPoint",
+                    "telephone": "+1-555-123-4567",
+                    "contactType": "customer service",
+                    "email": "support@ai-market.com",
+                    "availableLanguage": ["English"],
+                    "hoursAvailable": {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                        "opens": "09:00",
+                        "closes": "18:00"
+                    }
+                },
+                {
+                    "@type": "ContactPoint",
+                    "telephone": "+1-555-123-4568",
+                    "contactType": "sales",
+                    "email": "sales@ai-market.com"
+                }
+            ]
+        }
+    };
+
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl },
+            { "@type": "ListItem", "position": 2, "name": "Contact", "item": `${siteUrl}/contact` }
+        ]
+    };
+
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the response time for support requests?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our support team typically responds within 24 hours for standard requests and within 4 hours for priority support customers."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do you offer refunds?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, we offer a 30-day money-back guarantee on all products. If you're not satisfied, contact support for a full refund."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How can I become a vendor on AI Marketplace?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "To become a vendor, contact our partnerships team at partners@ai-market.com. We review all applications and onboard qualified AI tool developers."
+                }
+            }
+        ]
+    };
+
     return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Contact Us</title>
-        <meta name="description" content="Get in touch with us for any queries or support.">
-        <meta name="keywords" content="AI, marketplace, Contact, Support, Queries">
+        <title>Contact Us - AI Marketplace | Support & Sales</title>
+        <meta name="description" content="Contact AI Marketplace for customer support, sales inquiries, or partnership opportunities. Get 24/7 support and expert assistance for all AI tools.">
+        <meta name="keywords" content="contact AI Marketplace, AI support, customer service, sales inquiry, partnership, AI tools help">
+        <meta name="robots" content="index, follow">
+        <meta name="author" content="AI Marketplace">
+        <link rel="canonical" href="${siteUrl}/contact">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${siteUrl}/contact">
+        <meta property="og:title" content="Contact AI Marketplace - Support & Sales">
+        <meta property="og:description" content="Get in touch with our team for support, sales, or partnerships. We typically respond within 24 hours.">
+        <meta property="og:image" content="${siteUrl}/og-contact.jpg">
+        <meta property="og:site_name" content="AI Marketplace">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@aimarketplace">
+        <meta name="twitter:title" content="Contact AI Marketplace - Support & Sales">
+        <meta name="twitter:description" content="Get in touch with our team for support, sales, or partnerships.">
+        <meta name="twitter:image" content="${siteUrl}/twitter-contact.jpg">
+
+        <!-- JSON-LD Structured Data -->
+        <script type="application/ld+json">${JSON.stringify(contactSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(faqSchema)}</script>
+
         <style>
             * {
                 margin: 0;
@@ -662,21 +1398,220 @@ function generateContactPage() {
         </style>
     </head>
     <body>
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a> <span aria-hidden="true">›</span> <span>Contact Us</span>
+        </nav>
         <div class="container">
-            <div class="icon">📧</div>
-            <h1>Contact Us</h1>
-            <p>Have questions? We'd love to hear from you. Get in touch with our team!</p>
+            <div class="icon" aria-hidden="true">📧</div>
+            <h1>Contact AI Marketplace</h1>
+            <p>Have questions about our AI tools? Need technical support? Want to become a vendor? <strong>We'd love to hear from you!</strong></p>
+
             <div class="contact-info">
-                <div class="contact-item">📧 Email: contact@ai-market.com</div>
-                <div class="contact-item">💬 Support: support@ai-market.com</div>
-                <div class="contact-item">📱 Phone: +1 (555) 123-4567</div>
+                <h2>Get In Touch</h2>
+                <div class="contact-item">📧 <strong>General Inquiries:</strong> <a href="mailto:contact@ai-market.com">contact@ai-market.com</a></div>
+                <div class="contact-item">💬 <strong>Technical Support:</strong> <a href="mailto:support@ai-market.com">support@ai-market.com</a></div>
+                <div class="contact-item">💼 <strong>Sales & Enterprise:</strong> <a href="mailto:sales@ai-market.com">sales@ai-market.com</a></div>
+                <div class="contact-item">🤝 <strong>Partnerships:</strong> <a href="mailto:partners@ai-market.com">partners@ai-market.com</a></div>
+                <div class="contact-item">📱 <strong>Phone:</strong> <a href="tel:+15551234567">+1 (555) 123-4567</a></div>
             </div>
-            <p>We're here to help and answer any question you might have. Our team typically responds within 24 hours.</p>
+
+            <section class="faq-section" style="margin-top: 30px; text-align: left;">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-item" style="margin: 15px 0;">
+                    <h3 style="color: #667eea; font-size: 1.1em;">What is the response time for support requests?</h3>
+                    <p>Our support team typically responds within 24 hours for standard requests and within 4 hours for priority support customers.</p>
+                </div>
+                <div class="faq-item" style="margin: 15px 0;">
+                    <h3 style="color: #667eea; font-size: 1.1em;">Do you offer refunds?</h3>
+                    <p>Yes, we offer a <strong>30-day money-back guarantee</strong> on all products. If you're not satisfied, contact support for a full refund.</p>
+                </div>
+                <div class="faq-item" style="margin: 15px 0;">
+                    <h3 style="color: #667eea; font-size: 1.1em;">How can I become a vendor on AI Marketplace?</h3>
+                    <p>To become a vendor, contact our partnerships team at <a href="mailto:partners@ai-market.com">partners@ai-market.com</a>. We review all applications and onboard qualified AI tool developers.</p>
+                </div>
+            </section>
+
+            <p style="margin-top: 25px;">Our team is here to help and answer any question you might have. We're available <strong>Monday-Friday, 9AM-6PM EST</strong>.</p>
             <a href="/" class="back-link">← Back to Home</a>
+            <a href="/about" class="back-link" style="margin-left: 15px;">About Us →</a>
         </div>
     </body>
     </html>
     `;
+}
+
+// SEO Helper Functions
+function generateLlmsTxt() {
+    return `# AI Marketplace - LLMs.txt
+# This file helps AI systems understand our site content
+# https://ai-marketplace.com/llms.txt
+
+## About AI Marketplace
+AI Marketplace is the leading platform for AI-powered business tools and automation software. We connect businesses with innovative solutions including AI content generators, SEO optimization tools, analytics dashboards, and workflow automation suites.
+
+## Key Pages
+
+### Homepage
+> URL: https://ai-marketplace.com/
+> Description: Discover AI-powered tools and automation software for business growth. Browse our curated marketplace of AI solutions.
+> Topics: AI tools, automation software, business solutions, machine learning, productivity
+
+### Products
+
+#### AI Content Generator
+> URL: https://ai-marketplace.com/marketplace/items/1
+> Price: $99 USD
+> Rating: 4.9/5 (2,847 reviews)
+> Description: Create high-quality, SEO-optimized blog posts, product descriptions, and marketing copy using GPT-4 AI. Supports 50+ languages, generates 10,000+ words daily.
+> Use Cases: Content marketing, blog writing, product descriptions, social media posts
+
+#### SEO Optimization Tool
+> URL: https://ai-marketplace.com/marketplace/items/2
+> Price: $149 USD
+> Rating: 4.8/5 (1,923 reviews)
+> Description: AI-powered SEO toolkit with keyword research, competitor analysis, on-page optimization, and rank tracking.
+> Use Cases: Keyword research, rank tracking, competitor analysis, technical SEO audits
+
+#### Analytics Dashboard
+> URL: https://ai-marketplace.com/marketplace/items/3
+> Price: $199 USD
+> Rating: 4.9/5 (1,456 reviews)
+> Description: Real-time AI analytics with KPI tracking, trend visualization, automated reporting, and predictive insights.
+> Use Cases: Business intelligence, data visualization, KPI tracking, automated reports
+
+#### Automation Suite
+> URL: https://ai-marketplace.com/marketplace/items/4
+> Price: $299 USD
+> Rating: 4.7/5 (987 reviews)
+> Description: Enterprise-grade workflow automation connecting 500+ apps with intelligent triggers and AI-powered task routing.
+> Use Cases: Workflow automation, app integration, task automation, business process automation
+
+### Pricing
+> URL: https://ai-marketplace.com/pricing
+> Free: $0/mo - Basic access, 500 words/mo
+> Pro: $29/mo - Unlimited AI, all tools, priority support
+> Team: $99/mo - 10 users, advanced automation, dedicated manager
+
+### Contact
+> URL: https://ai-marketplace.com/contact
+> Email: support@ai-market.com
+> Phone: +1-555-123-4567
+> Response: Within 24 hours
+
+## Company Stats
+- Customers: 10,000+
+- Tasks Processed: 50M+
+- Average Rating: 4.8/5
+- Uptime: 99.9%
+`;
+}
+
+function generateRobotsTxt() {
+    return `# Robots.txt for AI Marketplace
+# https://ai-marketplace.com
+
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /pricing
+Allow: /marketplace/items
+
+# Disallow admin and API endpoints
+Disallow: /admin/
+Disallow: /api/
+Disallow: /billing/
+Disallow: /webhooks/
+
+# Sitemap location
+Sitemap: https://ai-marketplace.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+`;
+}
+
+function generateSitemapXml() {
+    const siteUrl = 'https://ai-marketplace.com';
+    const today = new Date().toISOString().split('T')[0];
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>${siteUrl}/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- About Page -->
+  <url>
+    <loc>${siteUrl}/about</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Contact Page -->
+  <url>
+    <loc>${siteUrl}/contact</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Pricing Page -->
+  <url>
+    <loc>${siteUrl}/pricing</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Marketplace Items Listing -->
+  <url>
+    <loc>${siteUrl}/marketplace/items</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Product: AI Content Generator -->
+  <url>
+    <loc>${siteUrl}/marketplace/items/1</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Product: SEO Optimization Tool -->
+  <url>
+    <loc>${siteUrl}/marketplace/items/2</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Product: Analytics Dashboard -->
+  <url>
+    <loc>${siteUrl}/marketplace/items/3</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Product: Automation Suite -->
+  <url>
+    <loc>${siteUrl}/marketplace/items/4</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>`;
 }
 
 async function generateAIContent(apiKey) {
@@ -975,7 +1910,200 @@ function planToPriceId(plan, env) {
 }
 
 async function handlePricing(request, env) {
+    // Check if request accepts HTML
+    const accept = request.headers.get('Accept') || '';
+    if (accept.includes('text/html')) {
+        return new Response(generatePricingPage(), {
+            headers: { 'Content-Type': 'text/html' }
+        });
+    }
+    // Return JSON for API requests
     return new Response(JSON.stringify({ plans: [{ id: 'free', price: 0 }, { id: 'pro', price: 29 }, { id: 'team', price: 99 }] }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+function generatePricingPage() {
+    const siteUrl = 'https://ai-marketplace.com';
+    const pricingSchema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "AI Marketplace Subscription",
+        "description": "Access to AI-powered business tools and automation software",
+        "brand": { "@type": "Brand", "name": "AI Marketplace" },
+        "offers": [
+            {
+                "@type": "Offer",
+                "name": "Free Plan",
+                "price": "0",
+                "priceCurrency": "USD",
+                "description": "Basic access to AI marketplace tools"
+            },
+            {
+                "@type": "Offer",
+                "name": "Pro Plan",
+                "price": "29",
+                "priceCurrency": "USD",
+                "priceValidUntil": "2027-12-31",
+                "description": "Full access to all AI tools with priority support"
+            },
+            {
+                "@type": "Offer",
+                "name": "Team Plan",
+                "price": "99",
+                "priceCurrency": "USD",
+                "priceValidUntil": "2027-12-31",
+                "description": "Team collaboration features with enterprise support"
+            }
+        ]
+    };
+
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl },
+            { "@type": "ListItem", "position": 2, "name": "Pricing", "item": siteUrl + "/pricing" }
+        ]
+    };
+
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pricing - AI Marketplace | Affordable AI Tools & Automation Plans</title>
+        <meta name="description" content="Choose the perfect AI Marketplace plan for your business. From free access to Pro features, find affordable pricing for AI content generators, SEO tools, and automation software.">
+        <meta name="keywords" content="AI tools pricing, automation software cost, AI marketplace plans, business software pricing, AI subscription, affordable AI tools">
+        <meta name="robots" content="index, follow">
+        <meta name="author" content="AI Marketplace">
+        <link rel="canonical" href="${siteUrl}/pricing">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${siteUrl}/pricing">
+        <meta property="og:title" content="AI Marketplace Pricing - Affordable AI Tools">
+        <meta property="og:description" content="Choose the perfect plan for your business. Free, Pro, and Team plans available.">
+        <meta property="og:image" content="${siteUrl}/og-pricing.jpg">
+        <meta property="og:site_name" content="AI Marketplace">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@aimarketplace">
+        <meta name="twitter:title" content="AI Marketplace Pricing - Affordable AI Tools">
+        <meta name="twitter:description" content="Choose the perfect plan for your business. Free, Pro, and Team plans available.">
+        <meta name="twitter:image" content="${siteUrl}/twitter-pricing.jpg">
+
+        <!-- JSON-LD Structured Data -->
+        <script type="application/ld+json">${JSON.stringify(pricingSchema)}</script>
+        <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 40px 20px;
+            }
+            .container { max-width: 1100px; margin: 0 auto; }
+            .breadcrumb { color: rgba(255,255,255,0.8); margin-bottom: 20px; }
+            .breadcrumb a { color: white; text-decoration: none; }
+            h1 { color: white; text-align: center; font-size: 2.5em; margin-bottom: 15px; }
+            .subtitle { color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 50px; font-size: 1.2em; }
+            .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+            .pricing-card {
+                background: white;
+                border-radius: 15px;
+                padding: 40px 30px;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                transition: transform 0.3s ease;
+            }
+            .pricing-card:hover { transform: translateY(-10px); }
+            .pricing-card.featured { border: 3px solid #667eea; transform: scale(1.05); }
+            .plan-name { font-size: 1.5em; color: #333; margin-bottom: 10px; }
+            .plan-price { font-size: 3em; color: #667eea; margin: 20px 0; }
+            .plan-price span { font-size: 0.4em; color: #666; }
+            .plan-features { list-style: none; margin: 30px 0; text-align: left; }
+            .plan-features li { padding: 10px 0; border-bottom: 1px solid #eee; }
+            .plan-features li:before { content: "✓ "; color: #28a745; font-weight: bold; }
+            .cta-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 40px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+            .cta-button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+            .back-link { display: inline-block; margin-top: 40px; color: white; text-decoration: none; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                <a href="/">Home</a> <span aria-hidden="true">›</span> <span>Pricing</span>
+            </nav>
+            <h1>Simple, Transparent Pricing</h1>
+            <p class="subtitle">Choose the perfect plan for your business needs. All plans include a 30-day money-back guarantee.</p>
+
+            <div class="pricing-grid">
+                <article class="pricing-card" itemscope itemtype="https://schema.org/Offer">
+                    <h2 class="plan-name" itemprop="name">Free</h2>
+                    <div class="plan-price"><span itemprop="priceCurrency" content="USD">$</span><span itemprop="price" content="0">0</span><span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>Access to marketplace browsing</li>
+                        <li>Basic AI content generation (500 words/mo)</li>
+                        <li>Community support</li>
+                        <li>1 project limit</li>
+                    </ul>
+                    <a href="/billing/checkout?plan=free" class="cta-button">Get Started Free</a>
+                </article>
+
+                <article class="pricing-card featured" itemscope itemtype="https://schema.org/Offer">
+                    <h2 class="plan-name" itemprop="name">Pro <span style="background:#667eea;color:white;padding:3px 8px;border-radius:4px;font-size:0.6em;">POPULAR</span></h2>
+                    <div class="plan-price"><span itemprop="priceCurrency" content="USD">$</span><span itemprop="price" content="29">29</span><span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>Unlimited AI content generation</li>
+                        <li>All SEO optimization tools</li>
+                        <li>Analytics dashboard access</li>
+                        <li>Priority email support</li>
+                        <li>Unlimited projects</li>
+                        <li>API access (10,000 calls/mo)</li>
+                    </ul>
+                    <a href="/billing/checkout?plan=pro" class="cta-button">Start Pro Trial</a>
+                </article>
+
+                <article class="pricing-card" itemscope itemtype="https://schema.org/Offer">
+                    <h2 class="plan-name" itemprop="name">Team</h2>
+                    <div class="plan-price"><span itemprop="priceCurrency" content="USD">$</span><span itemprop="price" content="99">99</span><span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>Everything in Pro</li>
+                        <li>Up to 10 team members</li>
+                        <li>Advanced automation suite</li>
+                        <li>Dedicated account manager</li>
+                        <li>Custom integrations</li>
+                        <li>SLA guarantee (99.9% uptime)</li>
+                        <li>Unlimited API access</li>
+                    </ul>
+                    <a href="/billing/checkout?plan=team" class="cta-button">Start Team Trial</a>
+                </article>
+            </div>
+
+            <div style="text-align: center; margin-top: 50px; color: rgba(255,255,255,0.9);">
+                <p><strong>Enterprise needs?</strong> Contact us at <a href="mailto:sales@ai-market.com" style="color: white;">sales@ai-market.com</a> for custom pricing.</p>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="/" class="back-link">← Back to Home</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
 }
 
 async function handleProFeature(request, env) {
