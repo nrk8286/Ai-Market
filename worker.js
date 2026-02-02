@@ -372,6 +372,24 @@ export default {
             return handleCreateSupportTicket(request);
         }
 
+        // ===== STRIPE PAYMENT INTEGRATION =====
+
+        // Create payment intent
+        if (url.pathname === '/api/payments/create-intent' && request.method === 'POST') {
+            return handleCreatePaymentIntent(request, env);
+        }
+
+        // Confirm payment
+        if (url.pathname === '/api/payments/confirm' && request.method === 'POST') {
+            return handleConfirmPayment(request, env);
+        }
+
+        // Get payment status
+        if (url.pathname.match(/^\/api\/payments\/([a-z0-9_]+)$/) && request.method === 'GET') {
+            const id = url.pathname.split('/')[3];
+            return handleGetPaymentStatus(request, env, id);
+        }
+
         // Marketplace Connect onboarding
         if (url.pathname.startsWith('/marketplace/connect/onboard')) {
             return handleConnectOnboard(request, env);
@@ -3126,7 +3144,7 @@ function generateCheckoutPage() {
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">🔒 Complete Purchase</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn">🔒 Complete Purchase</button>
                 <div class="security">
                     <p class="security-badge">🔐 SSL Encrypted | 🛡️ Fraud Protected | ✓ PCI Compliant</p>
                 </div>
@@ -3135,11 +3153,105 @@ function generateCheckoutPage() {
             <a href="/cart" class="back-link">← Back to Cart</a>
         </div>
 
+        <script src="https://js.stripe.com/v3/"></script>
         <script>
-            function handleCheckout(event) {
+            // Initialize Stripe
+            const stripe = Stripe('pk_test_51234567890abcdef'); // Will be replaced with env var in production
+            
+            async function handleCheckout(event) {
                 event.preventDefault();
-                alert('Payment processing: This would connect to Stripe in production. ✅ Order placed successfully!');
-                window.location.href = '/orders';
+                
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Processing...';
+                
+                try {
+                    // Get form data
+                    const formData = {
+                        firstName: document.getElementById('fname').value,
+                        lastName: document.getElementById('lname').value,
+                        email: document.getElementById('email').value,
+                        address: document.getElementById('address').value,
+                        city: document.getElementById('city').value,
+                        state: document.getElementById('state').value,
+                        zip: document.getElementById('zip').value,
+                        country: document.getElementById('country').value,
+                        cardNumber: document.getElementById('cardnum').value,
+                        expiry: document.getElementById('expiry').value,
+                        cvv: document.getElementById('cvv').value,
+                        cartTotal: localStorage.getItem('cartTotal') || '99.99'
+                    };
+                    
+                    // Send to backend to create payment intent
+                    const response = await fetch('/api/payments/create-intent', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!data.clientSecret) {
+                        throw new Error(data.error || 'Failed to create payment intent');
+                    }
+                    
+                    // Confirm payment
+                    const result = await stripe.confirmCardPayment(data.clientSecret, {
+                        payment_method: {
+                            card: {
+                                number: formData.cardNumber,
+                                exp_month: parseInt(formData.expiry.split('/')[0]),
+                                exp_year: parseInt('20' + formData.expiry.split('/')[1]),
+                                cvc: formData.cvv
+                            },
+                            billing_details: {
+                                name: formData.firstName + ' ' + formData.lastName,
+                                email: formData.email,
+                                address: {
+                                    line1: formData.address,
+                                    city: formData.city,
+                                    state: formData.state,
+                                    postal_code: formData.zip,
+                                    country: formData.country
+                                }
+                            }
+                        }
+                    });
+                    
+                    if (result.paymentIntent.status === 'succeeded') {
+                        // Order successful
+                        const orderId = 'ORD-' + Date.now();
+                        localStorage.setItem('lastOrderId', orderId);
+                        
+                        // Log to backend
+                        await fetch('/api/orders', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                orderId: orderId,
+                                email: formData.email,
+                                total: formData.cartTotal,
+                                items: JSON.parse(localStorage.getItem('cart') || '[]'),
+                                status: 'completed',
+                                paymentId: result.paymentIntent.id
+                            })
+                        });
+                        
+                        // Clear cart
+                        localStorage.removeItem('cart');
+                        localStorage.removeItem('cartTotal');
+                        
+                        window.location.href = '/orders?success=true&orderId=' + orderId;
+                    } else if (result.paymentIntent.status === 'requires_action') {
+                        alert('Payment requires additional authentication. Please complete 3D Secure.');
+                    } else {
+                        throw new Error('Payment failed: ' + result.error.message);
+                    }
+                } catch (error) {
+                    alert('❌ Payment Error: ' + error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '🔒 Complete Purchase';
+                }
             }
         </script>
     </body>
@@ -5283,6 +5395,153 @@ async function handleCreateSupportTicket(request) {
         localStorage.setItem('supportTickets', JSON.stringify(tickets));
         
         return new Response(JSON.stringify(ticket), { status: 201, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// ===== STRIPE PAYMENT HANDLERS =====
+
+// Create Payment Intent
+async function handleCreatePaymentIntent(request, env) {
+    try {
+        const { firstName, lastName, email, address, city, state, zip, country, cartTotal } = await request.json();
+        
+        if (!email || !cartTotal) {
+            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const amountInCents = Math.round(parseFloat(cartTotal) * 100);
+        
+        // Check if we have Stripe API key
+        if (!env.STRIPE_SECRET_KEY) {
+            // Generate demo payment intent
+            const demoIntent = {
+                id: 'pi_demo_' + Math.random().toString(36).slice(2, 10),
+                clientSecret: 'pi_demo_secret_' + Math.random().toString(36).slice(2, 20),
+                amount: amountInCents,
+                currency: 'usd',
+                status: 'requires_payment_method',
+                customer_email: email
+            };
+            
+            // Log to localStorage
+            const payments = JSON.parse(localStorage.getItem('payments') || '[]');
+            payments.push(demoIntent);
+            localStorage.setItem('payments', JSON.stringify(payments));
+            
+            return new Response(JSON.stringify({ clientSecret: demoIntent.clientSecret, paymentIntentId: demoIntent.id }), { 
+                status: 200, 
+                headers: { 'Content-Type': 'application/json' } 
+            });
+        }
+        
+        try {
+            // Use real Stripe API
+            const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + env.STRIPE_SECRET_KEY,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'amount': amountInCents,
+                    'currency': 'usd',
+                    'payment_method_types[]': 'card',
+                    'receipt_email': email,
+                    'metadata[firstName]': firstName,
+                    'metadata[lastName]': lastName,
+                    'metadata[address]': address,
+                    'metadata[city]': city,
+                    'metadata[state]': state,
+                    'metadata[zip]': zip,
+                    'metadata[country]': country
+                })
+            });
+            
+            if (!stripeResponse.ok) {
+                const error = await stripeResponse.json();
+                throw new Error(error.error?.message || 'Stripe API error');
+            }
+            
+            const paymentIntent = await stripeResponse.json();
+            
+            // Log payment intent
+            const payments = JSON.parse(localStorage.getItem('payments') || '[]');
+            payments.push(paymentIntent);
+            localStorage.setItem('payments', JSON.stringify(payments));
+            
+            return new Response(JSON.stringify({ clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id }), { 
+                status: 200, 
+                headers: { 'Content-Type': 'application/json' } 
+            });
+        } catch (stripeError) {
+            return new Response(JSON.stringify({ error: 'Payment service error: ' + stripeError.message }), { 
+                status: 500, 
+                headers: { 'Content-Type': 'application/json' } 
+            });
+        }
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Confirm Payment
+async function handleConfirmPayment(request, env) {
+    try {
+        const { paymentIntentId, status } = await request.json();
+        
+        if (!paymentIntentId) {
+            return new Response(JSON.stringify({ error: 'Missing paymentIntentId' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        // Update payment status
+        const payments = JSON.parse(localStorage.getItem('payments') || '[]');
+        const payment = payments.find(p => p.id === paymentIntentId);
+        
+        if (payment) {
+            payment.status = status || 'succeeded';
+            localStorage.setItem('payments', JSON.stringify(payments));
+        }
+        
+        return new Response(JSON.stringify({ success: true, paymentIntentId, status }), { 
+            status: 200, 
+            headers: { 'Content-Type': 'application/json' } 
+        });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Get Payment Status
+async function handleGetPaymentStatus(request, env, paymentIntentId) {
+    try {
+        if (!env.STRIPE_SECRET_KEY) {
+            // Check demo payments
+            const payments = JSON.parse(localStorage.getItem('payments') || '[]');
+            const payment = payments.find(p => p.id === paymentIntentId);
+            
+            if (!payment) {
+                return new Response(JSON.stringify({ error: 'Payment not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            }
+            
+            return new Response(JSON.stringify(payment), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        // Get from Stripe
+        const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents/' + paymentIntentId, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + env.STRIPE_SECRET_KEY
+            }
+        });
+        
+        if (!stripeResponse.ok) {
+            return new Response(JSON.stringify({ error: 'Payment not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const paymentIntent = await stripeResponse.json();
+        return new Response(JSON.stringify(paymentIntent), { status: 200, headers: { 'Content-Type': 'application/json' } });
     } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
