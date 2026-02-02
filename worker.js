@@ -333,6 +333,45 @@ export default {
             return handleGetRecommendations(request);
         }
 
+        // ===== AUTHENTICATION & USER MANAGEMENT =====
+
+        // User Registration
+        if (url.pathname === '/api/auth/register' && request.method === 'POST') {
+            return handleUserRegister(request);
+        }
+
+        // User Login
+        if (url.pathname === '/api/auth/login' && request.method === 'POST') {
+            return handleUserLogin(request);
+        }
+
+        // ===== ADVANCED FEATURES =====
+
+        // Email Notifications
+        if (url.pathname === '/api/email/send' && request.method === 'POST') {
+            return handleEmailNotification(request);
+        }
+
+        // Webhook Events
+        if (url.pathname === '/api/webhooks/event' && request.method === 'POST') {
+            return handleWebhookEvent(request);
+        }
+
+        // Promo Code Validation
+        if (url.pathname === '/api/promo/apply' && request.method === 'POST') {
+            return handleApplyPromoCode(request);
+        }
+
+        // License Key Management
+        if (url.pathname === '/api/licenses/issue' && request.method === 'POST') {
+            return handleIssueLicense(request);
+        }
+
+        // Support Tickets
+        if (url.pathname === '/api/support/tickets' && request.method === 'POST') {
+            return handleCreateSupportTicket(request);
+        }
+
         // Marketplace Connect onboarding
         if (url.pathname.startsWith('/marketplace/connect/onboard')) {
             return handleConnectOnboard(request, env);
@@ -5027,5 +5066,225 @@ async function handleGetRecommendations(request) {
     
     const filtered = category === 'all' ? recommendations : recommendations.filter(r => r.category === category);
     return new Response(JSON.stringify({ recommendations: filtered.slice(0, 4) }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+// ===== AUTHENTICATION & USER MANAGEMENT =====
+
+// User Registration Handler
+async function handleUserRegister(request) {
+    try {
+        const { email, password, name } = await request.json();
+        
+        if (!email || !password || !name) {
+            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        if (password.length < 8) {
+            return new Response(JSON.stringify({ error: 'Password must be at least 8 characters' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        // Store user in localStorage (production: use database)
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        if (users.some(u => u.email === email)) {
+            return new Response(JSON.stringify({ error: 'Email already exists' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const newUser = {
+            id: Date.now(),
+            email,
+            name,
+            password: btoa(password), // Basic encoding (use bcrypt in production)
+            createdAt: new Date(),
+            role: 'customer'
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        return new Response(JSON.stringify({ message: 'User registered successfully', userId: newUser.id }), { status: 201, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// User Login Handler
+async function handleUserLogin(request) {
+    try {
+        const { email, password } = await request.json();
+        
+        if (!email || !password) {
+            return new Response(JSON.stringify({ error: 'Email and password required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const user = users.find(u => u.email === email && u.password === btoa(password));
+        
+        if (!user) {
+            return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const token = btoa(JSON.stringify({ userId: user.id, email: user.email, role: user.role }));
+        
+        return new Response(JSON.stringify({ 
+            token, 
+            user: { id: user.id, email: user.email, name: user.name, role: user.role } 
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// ===== ADVANCED FEATURES =====
+
+// Email Notification Handler
+async function handleEmailNotification(request) {
+    try {
+        const { to, subject, type, data } = await request.json();
+        
+        if (!to || !subject || !type) {
+            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const emailLog = {
+            id: Date.now(),
+            to,
+            subject,
+            type,
+            data,
+            sentAt: new Date(),
+            status: 'sent'
+        };
+        
+        const emails = JSON.parse(localStorage.getItem('emailLogs') || '[]');
+        emails.push(emailLog);
+        localStorage.setItem('emailLogs', JSON.stringify(emails));
+        
+        return new Response(JSON.stringify({ message: 'Email notification queued', emailId: emailLog.id }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Webhook Handler for Payment Events
+async function handleWebhookEvent(request) {
+    try {
+        const event = await request.json();
+        
+        if (!event.type || !event.data) {
+            return new Response(JSON.stringify({ error: 'Invalid webhook format' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const webhookLog = {
+            id: Date.now(),
+            type: event.type,
+            data: event.data,
+            receivedAt: new Date(),
+            processed: true
+        };
+        
+        const webhooks = JSON.parse(localStorage.getItem('webhookLogs') || '[]');
+        webhooks.push(webhookLog);
+        localStorage.setItem('webhookLogs', JSON.stringify(webhooks));
+        
+        return new Response(JSON.stringify({ message: 'Webhook processed', webhookId: webhookLog.id }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Promo Code Handler
+async function handleApplyPromoCode(request) {
+    try {
+        const { code, cartTotal } = await request.json();
+        
+        if (!code) {
+            return new Response(JSON.stringify({ error: 'Promo code required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const promoCodes = {
+            'SAVE10': { discount: 0.10, type: 'percentage' },
+            'SAVE20': { discount: 0.20, type: 'percentage' },
+            'SAVE50': { discount: 50, type: 'fixed' },
+            'NEWYEAR': { discount: 0.15, type: 'percentage' }
+        };
+        
+        const promo = promoCodes[code.toUpperCase()];
+        if (!promo) {
+            return new Response(JSON.stringify({ error: 'Invalid promo code' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const discount = promo.type === 'percentage' ? cartTotal * promo.discount : promo.discount;
+        
+        return new Response(JSON.stringify({ 
+            code, 
+            discount, 
+            discountType: promo.type,
+            newTotal: Math.max(0, cartTotal - discount) 
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// License/Key Management Handler
+async function handleIssueLicense(request) {
+    try {
+        const { email, productId, duration } = await request.json();
+        
+        if (!email || !productId) {
+            return new Response(JSON.stringify({ error: 'Email and productId required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const licenseKey = 'LIC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + (duration || 365));
+        
+        const license = {
+            key: licenseKey,
+            email,
+            productId,
+            issuedAt: new Date(),
+            expiresAt,
+            active: true
+        };
+        
+        const licenses = JSON.parse(localStorage.getItem('licenses') || '[]');
+        licenses.push(license);
+        localStorage.setItem('licenses', JSON.stringify(licenses));
+        
+        return new Response(JSON.stringify(license), { status: 201, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Support Ticket Handler
+async function handleCreateSupportTicket(request) {
+    try {
+        const { email, subject, description, priority } = await request.json();
+        
+        if (!email || !subject || !description) {
+            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        const ticket = {
+            id: 'TKT-' + Date.now(),
+            email,
+            subject,
+            description,
+            priority: priority || 'medium',
+            status: 'open',
+            createdAt: new Date(),
+            responses: []
+        };
+        
+        const tickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+        tickets.push(ticket);
+        localStorage.setItem('supportTickets', JSON.stringify(tickets));
+        
+        return new Response(JSON.stringify(ticket), { status: 201, headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
 }
 
