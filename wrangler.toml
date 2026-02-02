@@ -1,6 +1,6 @@
 # Cloudflare Workers Configuration
 name = "ai-marketplace"
-account_id = "beab7f47997d4b33b1b477d39881b90a"
+account_id = "fad03f88124cd8f1979d1564faf4c026"
 workers_dev = true
 compatibility_date = "2026-02-01"
 compatibility_flags = ["nodejs_compat"]
@@ -9,5 +9,5 @@ main = "worker.js"
 # KV Namespace Bindings
 [[kv_namespaces]]
 binding = "MY_KV_NAMESPACE"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "beab7f47997d4b33b1b477d39881b90a
 preview_id = "YOUR_KV_PREVIEW_ID"
