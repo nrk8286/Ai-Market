@@ -4012,7 +4012,727 @@ function generateFaqPage() {
     `;
 }
 
+// ===== ADMIN PAGES =====
+
+function generateAdminDashboard() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Dashboard - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; }
+            .admin-container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+            .sidebar { background: #2c3e50; color: white; padding: 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+            .sidebar-header { font-size: 1.3em; font-weight: bold; margin-bottom: 30px; color: #667eea; }
+            .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
+            .sidebar-link { padding: 12px 15px; border-radius: 6px; color: white; text-decoration: none; transition: all 0.3s; }
+            .sidebar-link:hover { background: #667eea; color: white; }
+            .sidebar-link.active { background: #667eea; font-weight: bold; }
+            .main-content { padding: 30px; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+            .header h1 { font-size: 2em; color: #2c3e50; }
+            .user-info { text-align: right; }
+            .user-info p { color: #666; margin-bottom: 5px; }
+            .logout-btn { padding: 8px 20px; background: #ff6b6b; color: white; border: none; border-radius: 6px; cursor: pointer; }
+            .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+            .stat-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .stat-icon { font-size: 2.5em; margin-bottom: 10px; }
+            .stat-value { font-size: 2em; font-weight: bold; color: #667eea; }
+            .stat-label { color: #666; margin-top: 8px; font-size: 0.9em; }
+            .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+            .section-title { font-size: 1.4em; color: #2c3e50; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+            table { width: 100%; border-collapse: collapse; }
+            th { background: #f9f9f9; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }
+            td { padding: 12px; border-bottom: 1px solid #eee; }
+            tr:hover { background: #f9f9f9; }
+            .btn { padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+            .btn-primary { background: #667eea; color: white; }
+            .btn-primary:hover { background: #764ba2; }
+            .btn-danger { background: #ff6b6b; color: white; }
+            .btn-success { background: #28a745; color: white; }
+            .btn-sm { padding: 6px 12px; font-size: 0.85em; }
+            .chart-container { height: 300px; background: #f9f9f9; border-radius: 8px; padding: 20px; margin-top: 15px; }
+            .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; }
+            .status-completed { background: #d4edda; color: #155724; }
+            .status-pending { background: #fff3cd; color: #856404; }
+            .status-active { background: #d1ecf1; color: #0c5460; }
+        </style>
+    </head>
+    <body>
+        <div class="admin-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">🛡️ Admin Panel</div>
+                <nav class="sidebar-menu">
+                    <a href="/admin" class="sidebar-link active">📊 Dashboard</a>
+                    <a href="/admin/analytics" class="sidebar-link">📈 Analytics</a>
+                    <a href="/admin/products" class="sidebar-link">📦 Products</a>
+                    <a href="/admin/orders" class="sidebar-link">📋 Orders</a>
+                    <a href="/admin/customers" class="sidebar-link">👥 Customers</a>
+                    <a href="/admin/settings" class="sidebar-link">⚙️ Settings</a>
+                    <a href="/" class="sidebar-link" style="margin-top: 20px; color: #999;">🏠 Back to Site</a>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="header">
+                    <h1>📊 Admin Dashboard</h1>
+                    <div class="user-info">
+                        <p>Welcome, <strong>Admin User</strong></p>
+                        <button class="logout-btn">Sign Out</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value">$2,847</div>
+                        <div class="stat-label">Total Revenue (This Month)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-value">28</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value">142</div>
+                        <div class="stat-label">Total Customers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-value">4.8</div>
+                        <div class="stat-label">Average Rating</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Recent Orders</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#ORD-2025-028</td>
+                                <td>John Doe</td>
+                                <td>Feb 2, 2025</td>
+                                <td>$99.00</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                                <td><button class="btn btn-sm btn-primary">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD-2025-027</td>
+                                <td>Jane Smith</td>
+                                <td>Feb 1, 2025</td>
+                                <td>$248.00</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                                <td><button class="btn btn-sm btn-primary">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD-2025-026</td>
+                                <td>Mike Johnson</td>
+                                <td>Jan 31, 2025</td>
+                                <td>$149.00</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                                <td><button class="btn btn-sm btn-primary">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Top Performing Products</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Sales</th>
+                                <th>Revenue</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>AI Content Generator</strong></td>
+                                <td>12</td>
+                                <td>$1,188</td>
+                                <td>4.9/5</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SEO Optimization Tool</strong></td>
+                                <td>8</td>
+                                <td>$1,192</td>
+                                <td>4.8/5</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Analytics Dashboard</strong></td>
+                                <td>5</td>
+                                <td>$995</td>
+                                <td>4.9/5</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Quick Actions</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <button class="btn btn-primary" style="width: 100%; padding: 12px;">➕ Add Product</button>
+                        <button class="btn btn-primary" style="width: 100%; padding: 12px;">📧 Send Email</button>
+                        <button class="btn btn-primary" style="width: 100%; padding: 12px;">📊 Export Report</button>
+                        <button class="btn btn-primary" style="width: 100%; padding: 12px;">🔔 View Alerts</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateAnalyticsPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Analytics - Admin</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+            .admin-container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+            .sidebar { background: #2c3e50; color: white; padding: 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+            .sidebar-header { font-size: 1.3em; font-weight: bold; margin-bottom: 30px; color: #667eea; }
+            .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
+            .sidebar-link { padding: 12px 15px; border-radius: 6px; color: white; text-decoration: none; transition: all 0.3s; }
+            .sidebar-link:hover { background: #667eea; }
+            .sidebar-link.active { background: #667eea; font-weight: bold; }
+            .main-content { padding: 30px; }
+            .header { margin-bottom: 30px; }
+            .header h1 { font-size: 2em; color: #2c3e50; }
+            .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+            .section-title { font-size: 1.4em; color: #2c3e50; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+            .metric { margin: 20px 0; }
+            .metric-label { color: #666; font-size: 0.9em; margin-bottom: 8px; }
+            .metric-value { font-size: 2em; font-weight: bold; color: #667eea; }
+            .metric-change { color: #28a745; font-size: 0.9em; }
+            .chart { background: #f9f9f9; border-radius: 8px; padding: 20px; height: 300px; display: flex; align-items: center; justify-content: center; color: #999; }
+            .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="admin-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">🛡️ Admin Panel</div>
+                <nav class="sidebar-menu">
+                    <a href="/admin" class="sidebar-link">📊 Dashboard</a>
+                    <a href="/admin/analytics" class="sidebar-link active">📈 Analytics</a>
+                    <a href="/admin/products" class="sidebar-link">📦 Products</a>
+                    <a href="/admin/orders" class="sidebar-link">📋 Orders</a>
+                    <a href="/admin/customers" class="sidebar-link">👥 Customers</a>
+                    <a href="/admin/settings" class="sidebar-link">⚙️ Settings</a>
+                    <a href="/" class="sidebar-link" style="margin-top: 20px; color: #999;">🏠 Back to Site</a>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="header">
+                    <h1>📈 Analytics & Reports</h1>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Revenue Analytics</h2>
+                    <div class="metric-row">
+                        <div class="metric">
+                            <div class="metric-label">Monthly Revenue</div>
+                            <div class="metric-value">$2,847</div>
+                            <div class="metric-change">↑ 12% from last month</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Average Order Value</div>
+                            <div class="metric-value">$101.68</div>
+                            <div class="metric-change">↑ 5% from last month</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Total Transactions</div>
+                            <div class="metric-value">28</div>
+                            <div class="metric-change">↑ 8% from last month</div>
+                        </div>
+                    </div>
+                    <div class="chart">📊 Revenue Chart (Coming Soon)</div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Customer Analytics</h2>
+                    <div class="metric-row">
+                        <div class="metric">
+                            <div class="metric-label">Total Customers</div>
+                            <div class="metric-value">142</div>
+                            <div class="metric-change">↑ 18 new this month</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Customer Retention</div>
+                            <div class="metric-value">78%</div>
+                            <div class="metric-change">↑ 3% from last month</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Customer LTV</div>
+                            <div class="metric-value">$247</div>
+                            <div class="metric-change">↑ 15% from last month</div>
+                        </div>
+                    </div>
+                    <div class="chart">👥 Customer Growth Chart (Coming Soon)</div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Product Performance</h2>
+                    <div class="metric-row">
+                        <div class="metric">
+                            <div class="metric-label">Best Seller</div>
+                            <div class="metric-value">AI Content Generator</div>
+                            <div class="metric-change">42% of revenue</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Most Viewed</div>
+                            <div class="metric-value">SEO Tool</div>
+                            <div class="metric-change">1,247 views this month</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Highest Rated</div>
+                            <div class="metric-value">Analytics Dashboard</div>
+                            <div class="metric-change">4.9/5 stars</div>
+                        </div>
+                    </div>
+                    <div class="chart">📦 Product Sales Chart (Coming Soon)</div>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateProductsManagementPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Products - Admin</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+            .admin-container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+            .sidebar { background: #2c3e50; color: white; padding: 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+            .sidebar-header { font-size: 1.3em; font-weight: bold; margin-bottom: 30px; color: #667eea; }
+            .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
+            .sidebar-link { padding: 12px 15px; border-radius: 6px; color: white; text-decoration: none; }
+            .sidebar-link.active { background: #667eea; font-weight: bold; }
+            .main-content { padding: 30px; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+            .header h1 { font-size: 2em; color: #2c3e50; }
+            .btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+            .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .section-title { font-size: 1.4em; color: #2c3e50; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+            table { width: 100%; border-collapse: collapse; }
+            th { background: #f9f9f9; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }
+            td { padding: 12px; border-bottom: 1px solid #eee; }
+            .btn-sm { padding: 6px 12px; font-size: 0.85em; margin-right: 5px; }
+            .btn-edit { background: #667eea; color: white; }
+            .btn-delete { background: #ff6b6b; color: white; }
+        </style>
+    </head>
+    <body>
+        <div class="admin-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">🛡️ Admin</div>
+                <nav class="sidebar-menu">
+                    <a href="/admin" class="sidebar-link">📊 Dashboard</a>
+                    <a href="/admin/analytics" class="sidebar-link">📈 Analytics</a>
+                    <a href="/admin/products" class="sidebar-link active">📦 Products</a>
+                    <a href="/admin/orders" class="sidebar-link">📋 Orders</a>
+                    <a href="/admin/customers" class="sidebar-link">👥 Customers</a>
+                    <a href="/admin/settings" class="sidebar-link">⚙️ Settings</a>
+                    <a href="/" class="sidebar-link" style="margin-top: 20px; color: #999;">🏠 Back</a>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="header">
+                    <h1>📦 Product Management</h1>
+                    <button class="btn">➕ Add New Product</button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">All Products</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Sales</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>AI Content Generator</strong></td>
+                                <td>Content</td>
+                                <td>$99/mo</td>
+                                <td>12</td>
+                                <td>4.9/5</td>
+                                <td>🟢 Active</td>
+                                <td><button class="btn btn-sm btn-edit">Edit</button><button class="btn btn-sm btn-delete">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SEO Optimization Tool</strong></td>
+                                <td>SEO</td>
+                                <td>$149/mo</td>
+                                <td>8</td>
+                                <td>4.8/5</td>
+                                <td>🟢 Active</td>
+                                <td><button class="btn btn-sm btn-edit">Edit</button><button class="btn btn-sm btn-delete">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Analytics Dashboard</strong></td>
+                                <td>Analytics</td>
+                                <td>$199/mo</td>
+                                <td>5</td>
+                                <td>4.9/5</td>
+                                <td>🟢 Active</td>
+                                <td><button class="btn btn-sm btn-edit">Edit</button><button class="btn btn-sm btn-delete">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Automation Suite</strong></td>
+                                <td>Automation</td>
+                                <td>$299/mo</td>
+                                <td>3</td>
+                                <td>4.7/5</td>
+                                <td>🟢 Active</td>
+                                <td><button class="btn btn-sm btn-edit">Edit</button><button class="btn btn-sm btn-delete">Delete</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateOrdersManagementPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Orders - Admin</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+            .admin-container { display: grid; grid-template-columns: 250px 1fr; }
+            .sidebar { background: #2c3e50; color: white; padding: 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+            .sidebar-header { font-size: 1.3em; font-weight: bold; margin-bottom: 30px; color: #667eea; }
+            .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
+            .sidebar-link { padding: 12px 15px; border-radius: 6px; color: white; text-decoration: none; }
+            .sidebar-link.active { background: #667eea; font-weight: bold; }
+            .main-content { padding: 30px; }
+            .header h1 { font-size: 2em; color: #2c3e50; margin-bottom: 20px; }
+            .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .section-title { font-size: 1.4em; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; }
+            th { background: #f9f9f9; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }
+            td { padding: 12px; border-bottom: 1px solid #eee; }
+            .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; }
+            .badge-completed { background: #d4edda; color: #155724; }
+            .badge-pending { background: #fff3cd; color: #856404; }
+            .btn-view { padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        </style>
+    </head>
+    <body>
+        <div class="admin-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">🛡️ Admin</div>
+                <nav class="sidebar-menu">
+                    <a href="/admin" class="sidebar-link">📊 Dashboard</a>
+                    <a href="/admin/analytics" class="sidebar-link">📈 Analytics</a>
+                    <a href="/admin/products" class="sidebar-link">📦 Products</a>
+                    <a href="/admin/orders" class="sidebar-link active">📋 Orders</a>
+                    <a href="/admin/customers" class="sidebar-link">👥 Customers</a>
+                    <a href="/admin/settings" class="sidebar-link">⚙️ Settings</a>
+                    <a href="/" class="sidebar-link" style="margin-top: 20px; color: #999;">🏠 Back</a>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="header">
+                    <h1>📋 Order Management</h1>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Recent Orders</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Items</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#ORD-2025-028</td>
+                                <td>John Doe</td>
+                                <td>Feb 2, 2025</td>
+                                <td>$99.00</td>
+                                <td>1</td>
+                                <td><span class="badge badge-completed">Completed</span></td>
+                                <td><button class="btn-view">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD-2025-027</td>
+                                <td>Jane Smith</td>
+                                <td>Feb 1, 2025</td>
+                                <td>$248.00</td>
+                                <td>2</td>
+                                <td><span class="badge badge-completed">Completed</span></td>
+                                <td><button class="btn-view">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD-2025-026</td>
+                                <td>Mike Johnson</td>
+                                <td>Jan 31, 2025</td>
+                                <td>$149.00</td>
+                                <td>1</td>
+                                <td><span class="badge badge-pending">Pending</span></td>
+                                <td><button class="btn-view">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateCustomersManagementPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Customers - Admin</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+            .admin-container { display: grid; grid-template-columns: 250px 1fr; }
+            .sidebar { background: #2c3e50; color: white; padding: 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+            .sidebar-header { font-size: 1.3em; font-weight: bold; margin-bottom: 30px; color: #667eea; }
+            .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
+            .sidebar-link { padding: 12px 15px; border-radius: 6px; color: white; text-decoration: none; }
+            .sidebar-link.active { background: #667eea; font-weight: bold; }
+            .main-content { padding: 30px; }
+            .header h1 { font-size: 2em; color: #2c3e50; margin-bottom: 20px; }
+            .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .section-title { font-size: 1.4em; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; }
+            th { background: #f9f9f9; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }
+            td { padding: 12px; border-bottom: 1px solid #eee; }
+        </style>
+    </head>
+    <body>
+        <div class="admin-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">🛡️ Admin</div>
+                <nav class="sidebar-menu">
+                    <a href="/admin" class="sidebar-link">📊 Dashboard</a>
+                    <a href="/admin/analytics" class="sidebar-link">📈 Analytics</a>
+                    <a href="/admin/products" class="sidebar-link">📦 Products</a>
+                    <a href="/admin/orders" class="sidebar-link">📋 Orders</a>
+                    <a href="/admin/customers" class="sidebar-link active">👥 Customers</a>
+                    <a href="/admin/settings" class="sidebar-link">⚙️ Settings</a>
+                    <a href="/" class="sidebar-link" style="margin-top: 20px; color: #999;">🏠 Back</a>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="header">
+                    <h1>👥 Customer Management</h1>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">All Customers (142 Total)</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Orders</th>
+                                <th>Total Spent</th>
+                                <th>Join Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>John Doe</td>
+                                <td>john@example.com</td>
+                                <td>3</td>
+                                <td>$347</td>
+                                <td>Jan 15, 2025</td>
+                            </tr>
+                            <tr>
+                                <td>Jane Smith</td>
+                                <td>jane@example.com</td>
+                                <td>5</td>
+                                <td>$745</td>
+                                <td>Dec 20, 2024</td>
+                            </tr>
+                            <tr>
+                                <td>Mike Johnson</td>
+                                <td>mike@example.com</td>
+                                <td>2</td>
+                                <td>$248</td>
+                                <td>Jan 5, 2025</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateAdminSettingsPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Settings - Admin</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+            .admin-container { display: grid; grid-template-columns: 250px 1fr; }
+            .sidebar { background: #2c3e50; color: white; padding: 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+            .sidebar-header { font-size: 1.3em; font-weight: bold; margin-bottom: 30px; color: #667eea; }
+            .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
+            .sidebar-link { padding: 12px 15px; border-radius: 6px; color: white; text-decoration: none; }
+            .sidebar-link.active { background: #667eea; font-weight: bold; }
+            .main-content { padding: 30px; max-width: 800px; }
+            .header h1 { font-size: 2em; color: #2c3e50; margin-bottom: 20px; }
+            .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+            .section-title { font-size: 1.3em; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+            .form-group { margin-bottom: 20px; }
+            .form-group label { display: block; font-weight: bold; margin-bottom: 8px; }
+            .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+            .btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+            .btn-danger { background: #ff6b6b; }
+        </style>
+    </head>
+    <body>
+        <div class="admin-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">🛡️ Admin</div>
+                <nav class="sidebar-menu">
+                    <a href="/admin" class="sidebar-link">📊 Dashboard</a>
+                    <a href="/admin/analytics" class="sidebar-link">📈 Analytics</a>
+                    <a href="/admin/products" class="sidebar-link">📦 Products</a>
+                    <a href="/admin/orders" class="sidebar-link">📋 Orders</a>
+                    <a href="/admin/customers" class="sidebar-link">👥 Customers</a>
+                    <a href="/admin/settings" class="sidebar-link active">⚙️ Settings</a>
+                    <a href="/" class="sidebar-link" style="margin-top: 20px; color: #999;">🏠 Back</a>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="header">
+                    <h1>⚙️ Settings</h1>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Store Settings</h2>
+                    <div class="form-group">
+                        <label>Store Name</label>
+                        <input type="text" value="AI Marketplace" />
+                    </div>
+                    <div class="form-group">
+                        <label>Store Email</label>
+                        <input type="email" value="support@ai-market.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>Store URL</label>
+                        <input type="text" value="https://ai-marketplace.com" />
+                    </div>
+                    <button class="btn">💾 Save Settings</button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Payment Settings</h2>
+                    <div class="form-group">
+                        <label>Stripe API Key</label>
+                        <input type="password" placeholder="sk_live_..." />
+                    </div>
+                    <div class="form-group">
+                        <label>PayPal Client ID</label>
+                        <input type="text" placeholder="AV..." />
+                    </div>
+                    <button class="btn">💾 Save Settings</button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Email Settings</h2>
+                    <div class="form-group">
+                        <label>SMTP Host</label>
+                        <input type="text" placeholder="smtp.gmail.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>SMTP Port</label>
+                        <input type="text" placeholder="587" />
+                    </div>
+                    <button class="btn">💾 Save Settings</button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Danger Zone</h2>
+                    <p style="color: #666; margin-bottom: 15px;">These actions cannot be undone.</p>
+                    <button class="btn btn-danger">🗑️ Clear All Orders</button>
+                    <button class="btn btn-danger" style="margin-left: 10px;">🗑️ Reset Database</button>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
 // ===== API HANDLER FUNCTIONS =====
+
 
 // Shopping Cart Handlers
 async function handleGetCart(request) {
