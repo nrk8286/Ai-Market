@@ -42,6 +42,81 @@ export default {
             });
         }
 
+        // User Pages
+        if (url.pathname === "/shop") {
+            return new Response(generateShopPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/products") {
+            return new Response(generateProductsPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        // Product detail pages
+        const productMatch = url.pathname.match(/^\/products\/(.+)$/);
+        if (productMatch) {
+            return new Response(generateProductDetailPage(productMatch[1]), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/cart") {
+            return new Response(generateCartPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/checkout") {
+            return new Response(generateCheckoutPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/login") {
+            return new Response(generateLoginPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/register") {
+            return new Response(generateRegisterPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/dashboard") {
+            return new Response(generateDashboardPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/orders") {
+            return new Response(generateOrdersPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/account") {
+            return new Response(generateAccountPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/support") {
+            return new Response(generateSupportPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/faq") {
+            return new Response(generateFaqPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
         // Elite AI Prompt Autonomous Agent Endpoints
         if (url.pathname.startsWith("/api/autonomous-agent")) {
             return handleAutonomousAgent(request, env);
@@ -2352,4 +2427,1453 @@ async function handleAdmin(request, env) {
     } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
+}
+
+// ===== NEW USER PAGES =====
+function generateNavigation() {
+    return `
+    <nav style="background: rgba(102, 126, 234, 0.1); padding: 15px 30px; border-radius: 8px; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; align-items: center; margin-bottom: 30px;">
+        <a href="/" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">🏠 Home</a>
+        <a href="/shop" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">🛒 Shop</a>
+        <a href="/products" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">📦 Products</a>
+        <a href="/cart" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">🛍️ Cart</a>
+        <a href="/dashboard" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">📊 Dashboard</a>
+        <a href="/orders" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">📋 Orders</a>
+        <a href="/account" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">👤 Account</a>
+        <a href="/faq" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">❓ FAQ</a>
+        <a href="/support" style="color: #667eea; text-decoration: none; font-weight: 500; transition: all 0.3s;">📞 Support</a>
+    </nav>
+    `;
+}
+
+function generateShopPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shop - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 1200px; margin: 0 auto; }
+            .header { text-align: center; color: white; margin-bottom: 40px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin: 40px 0; }
+            .product-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: all 0.3s; cursor: pointer; }
+            .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+            .product-icon { font-size: 3em; margin-bottom: 15px; text-align: center; }
+            .product-name { font-size: 1.4em; color: #667eea; font-weight: bold; margin-bottom: 10px; }
+            .product-price { font-size: 1.6em; color: #764ba2; font-weight: bold; margin: 15px 0; }
+            .product-desc { color: #666; line-height: 1.6; margin-bottom: 15px; font-size: 0.95em; }
+            .btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: all 0.3s; border: none; cursor: pointer; }
+            .btn:hover { transform: scale(1.05); }
+            .btn-secondary { background: #f0f0f0; color: #667eea; }
+            .btn-secondary:hover { background: #e0e0e0; }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>🛒 Our Product Shop</h1>
+                <p>Browse our complete collection of AI-powered tools</p>
+            </div>
+            
+            <div class="shop-grid">
+                <div class="product-card">
+                    <div class="product-icon">🤖</div>
+                    <h3 class="product-name">AI Content Generator</h3>
+                    <div class="product-price">$99/month</div>
+                    <p class="product-desc">Create SEO-optimized content in 50+ languages with GPT-4 AI</p>
+                    <a href="/products/ai-content-generator" class="btn">View Details →</a>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-icon">🔍</div>
+                    <h3 class="product-name">SEO Optimization Tool</h3>
+                    <div class="product-price">$149/month</div>
+                    <p class="product-desc">Keyword research, competitor analysis, rank tracking in one tool</p>
+                    <a href="/products/seo-tool" class="btn">View Details →</a>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-icon">📊</div>
+                    <h3 class="product-name">Analytics Dashboard</h3>
+                    <div class="product-price">$199/month</div>
+                    <p class="product-desc">Real-time AI analytics with predictive insights and reports</p>
+                    <a href="/products/analytics-dashboard" class="btn">View Details →</a>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-icon">⚡</div>
+                    <h3 class="product-name">Automation Suite</h3>
+                    <div class="product-price">$299/month</div>
+                    <p class="product-desc">Automate 500+ integrations with intelligent AI workflows</p>
+                    <a href="/products/automation-suite" class="btn">View Details →</a>
+                </div>
+            </div>
+
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateProductsPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Products - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 1200px; margin: 0 auto; }
+            .header { text-align: center; color: white; margin-bottom: 40px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .filters { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 30px; display: flex; gap: 15px; flex-wrap: wrap; }
+            .filter-btn { background: white; color: #667eea; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; transition: all 0.3s; }
+            .filter-btn:hover { background: #667eea; color: white; }
+            .products-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+            .table-header { background: #667eea; color: white; padding: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 15px; font-weight: bold; }
+            .table-row { padding: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 15px; border-bottom: 1px solid #eee; align-items: center; }
+            .table-row:last-child { border-bottom: none; }
+            .table-row:hover { background: #f9f9f9; }
+            .btn { padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; }
+            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .btn-primary:hover { transform: scale(1.05); }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>📦 All Products</h1>
+                <p>Complete catalog of AI-powered business solutions</p>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn">✓ All Products</button>
+                <button class="filter-btn">⭐ Bestsellers</button>
+                <button class="filter-btn">🆕 New</button>
+                <button class="filter-btn">💎 Premium</button>
+                <button class="filter-btn">🔥 On Sale</button>
+            </div>
+
+            <div class="products-table">
+                <div class="table-header">
+                    <div>Product Name</div>
+                    <div>Category</div>
+                    <div>Price</div>
+                    <div>Rating</div>
+                    <div>Action</div>
+                </div>
+
+                <div class="table-row">
+                    <div><strong>AI Content Generator</strong></div>
+                    <div>Content & Marketing</div>
+                    <div style="color: #764ba2; font-weight: bold;">$99/mo</div>
+                    <div>⭐ 4.9/5</div>
+                    <div><a href="/products/ai-content-generator" class="btn btn-primary">View</a></div>
+                </div>
+
+                <div class="table-row">
+                    <div><strong>SEO Optimization Tool</strong></div>
+                    <div>SEO & Analytics</div>
+                    <div style="color: #764ba2; font-weight: bold;">$149/mo</div>
+                    <div>⭐ 4.8/5</div>
+                    <div><a href="/products/seo-tool" class="btn btn-primary">View</a></div>
+                </div>
+
+                <div class="table-row">
+                    <div><strong>Analytics Dashboard</strong></div>
+                    <div>Analytics & BI</div>
+                    <div style="color: #764ba2; font-weight: bold;">$199/mo</div>
+                    <div>⭐ 4.9/5</div>
+                    <div><a href="/products/analytics-dashboard" class="btn btn-primary">View</a></div>
+                </div>
+
+                <div class="table-row">
+                    <div><strong>Automation Suite</strong></div>
+                    <div>Workflow & Integration</div>
+                    <div style="color: #764ba2; font-weight: bold;">$299/mo</div>
+                    <div>⭐ 4.7/5</div>
+                    <div><a href="/products/automation-suite" class="btn btn-primary">View</a></div>
+                </div>
+            </div>
+
+            <a href="/shop" class="back-link">← Back to Shop</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateProductDetailPage(productId) {
+    const products = {
+        "ai-content-generator": {
+            name: "AI Content Generator",
+            icon: "🤖",
+            price: "$99/month",
+            rating: "4.9/5 (2,847 reviews)",
+            description: "Create high-quality, SEO-optimized blog posts, product descriptions, and marketing copy using GPT-4 AI.",
+            features: ["50+ language support", "10,000+ words/day", "AI-powered SEO optimization", "Plagiarism detection", "Content calendar", "Team collaboration"]
+        },
+        "seo-tool": {
+            name: "SEO Optimization Tool",
+            icon: "🔍",
+            price: "$149/month",
+            rating: "4.8/5 (1,923 reviews)",
+            description: "Boost your Google rankings with AI-powered keyword research, competitor analysis, and real-time rank tracking.",
+            features: ["Keyword research", "Competitor analysis", "Rank tracking", "Technical SEO audits", "Backlink analysis", "Content optimization"]
+        },
+        "analytics-dashboard": {
+            name: "Analytics Dashboard",
+            icon: "📊",
+            price: "$199/month",
+            rating: "4.9/5 (1,456 reviews)",
+            description: "Make data-driven decisions with real-time AI analytics, visualizations, and predictive insights.",
+            features: ["Real-time dashboards", "Predictive analytics", "Custom reports", "Data visualization", "ML-powered forecasting", "Integration with 100+ tools"]
+        },
+        "automation-suite": {
+            name: "Automation Suite",
+            icon: "⚡",
+            price: "$299/month",
+            rating: "4.7/5 (987 reviews)",
+            description: "Automate workflows with intelligent AI. Connect 500+ apps and streamline your entire business.",
+            features: ["500+ app integrations", "Visual workflow builder", "Conditional logic", "Error handling", "Custom webhooks", "Team management"]
+        }
+    };
+
+    const product = products[productId] || products["ai-content-generator"];
+
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${product.name} - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 1000px; margin: 0 auto; }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+            .product-detail { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+            .product-header { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; margin-bottom: 40px; }
+            .product-icon { font-size: 5em; text-align: center; }
+            .product-info h1 { font-size: 2.5em; color: #667eea; margin-bottom: 15px; }
+            .product-rating { color: #666; margin-bottom: 15px; font-size: 1.1em; }
+            .product-price { font-size: 2.2em; color: #764ba2; font-weight: bold; margin-bottom: 20px; }
+            .product-desc { color: #666; line-height: 1.8; margin-bottom: 20px; }
+            .features { margin: 30px 0; }
+            .features h3 { color: #667eea; margin-bottom: 15px; font-size: 1.3em; }
+            .features-list { list-style: none; }
+            .features-list li { padding: 10px 0; color: #666; border-bottom: 1px solid #eee; }
+            .features-list li:before { content: "✓ "; color: #28a745; font-weight: bold; margin-right: 10px; }
+            .actions { display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
+            .btn { padding: 15px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; font-size: 1.1em; transition: all 0.3s; }
+            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .btn-primary:hover { transform: scale(1.05); }
+            .btn-secondary { background: #f0f0f0; color: #667eea; }
+            .btn-secondary:hover { background: #e0e0e0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <a href="/products" class="back-link">← Back to Products</a>
+
+            <div class="product-detail">
+                <div class="product-header">
+                    <div class="product-icon">${product.icon}</div>
+                    <div class="product-info">
+                        <h1>${product.name}</h1>
+                        <div class="product-rating">${product.rating}</div>
+                        <div class="product-price">${product.price}</div>
+                        <p class="product-desc">${product.description}</p>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h3>✨ Key Features</h3>
+                    <ul class="features-list">
+                        ${product.features.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="actions">
+                    <a href="/cart" class="btn btn-primary">🛒 Add to Cart</a>
+                    <a href="/checkout" class="btn btn-primary">💳 Buy Now</a>
+                    <button class="btn btn-secondary">❤️ Save for Later</button>
+                    <button class="btn btn-secondary">📧 Get Updates</button>
+                </div>
+
+                <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #eee; color: #666;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">What's Included?</h3>
+                    <p>✓ Full access to all features | ✓ 24/7 customer support | ✓ Free updates | ✓ 30-day money-back guarantee | ✓ Early access to new features</p>
+                </div>
+            </div>
+
+            <a href="/products" class="back-link">← Back to Products</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateCartPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shopping Cart - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 1000px; margin: 0 auto; }
+            .header { text-align: center; color: white; margin-bottom: 30px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .cart-content { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+            .cart-items { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+            .empty-cart { text-align: center; padding: 40px; }
+            .empty-cart-icon { font-size: 4em; margin-bottom: 20px; }
+            .empty-cart p { color: #666; margin-bottom: 20px; }
+            .cart-item { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; padding: 15px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 15px; align-items: center; }
+            .cart-item-name { font-weight: bold; color: #667eea; }
+            .cart-item-price { color: #764ba2; font-weight: bold; }
+            .remove-btn { background: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+            .summary { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); height: fit-content; }
+            .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+            .summary-total { display: flex; justify-content: space-between; font-size: 1.3em; font-weight: bold; color: #764ba2; margin: 20px 0; }
+            .btn { width: 100%; padding: 15px; border-radius: 6px; border: none; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: all 0.3s; margin-bottom: 10px; }
+            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .btn-primary:hover { transform: scale(1.02); }
+            .btn-secondary { background: #f0f0f0; color: #667eea; }
+            .btn-secondary:hover { background: #e0e0e0; }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>🛍️ Shopping Cart</h1>
+            </div>
+
+            <div class="cart-content">
+                <div class="cart-items">
+                    <h2 style="margin-bottom: 20px; color: #667eea;">Cart Items</h2>
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <p>Your cart is currently empty.</p>
+                        <p style="font-size: 0.9em; color: #999;">Start by browsing our products!</p>
+                        <a href="/shop" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold;">Browse Products →</a>
+                    </div>
+                </div>
+
+                <div class="summary">
+                    <h2 style="margin-bottom: 20px; color: #667eea;">Order Summary</h2>
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span>FREE</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <button class="btn btn-primary" disabled style="opacity: 0.6;">💳 Proceed to Checkout</button>
+                    <button class="btn btn-secondary">Continue Shopping</button>
+                </div>
+            </div>
+
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateCheckoutPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Checkout - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 900px; margin: 0 auto; }
+            .header { text-align: center; color: white; margin-bottom: 30px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .checkout-form { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+            .form-section { margin-bottom: 30px; }
+            .form-section h2 { font-size: 1.4em; color: #667eea; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+            .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
+            .form-row.full { grid-template-columns: 1fr; }
+            .form-group { display: flex; flex-direction: column; }
+            .form-group label { font-weight: bold; margin-bottom: 8px; color: #333; }
+            .form-group input, .form-group select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; }
+            .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+            .order-summary { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 30px 0; }
+            .order-item { display: flex; justify-content: space-between; margin-bottom: 10px; }
+            .order-total { font-size: 1.3em; font-weight: bold; color: #764ba2; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; }
+            .btn { padding: 15px 30px; border-radius: 6px; border: none; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: all 0.3s; }
+            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 100%; }
+            .btn-primary:hover { transform: scale(1.02); }
+            .btn-secondary { background: #f0f0f0; color: #667eea; }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+            .security { text-align: center; margin-top: 20px; color: #666; }
+            .security-badge { font-size: 0.9em; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>💳 Checkout</h1>
+                <p>Secure payment with encrypted transmission</p>
+            </div>
+
+            <form class="checkout-form" onsubmit="handleCheckout(event)">
+                <div class="form-section">
+                    <h2>📍 Billing Address</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fname">First Name</label>
+                            <input type="text" id="fname" name="fname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lname">Last Name</label>
+                            <input type="text" id="lname" name="lname" required>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="address">Street Address</label>
+                            <input type="text" id="address" name="address" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State/Province</label>
+                            <input type="text" id="state" name="state" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="zip">Zip/Postal Code</label>
+                            <input type="text" id="zip" name="zip" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <select id="country" name="country" required>
+                                <option>United States</option>
+                                <option>Canada</option>
+                                <option>United Kingdom</option>
+                                <option>Australia</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>💳 Payment Information</h2>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="cardholder">Cardholder Name</label>
+                            <input type="text" id="cardholder" name="cardholder" required>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="cardnum">Card Number</label>
+                            <input type="text" id="cardnum" name="cardnum" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expiry">Expiry Date</label>
+                            <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" name="cvv" placeholder="123" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Order Summary</h3>
+                    <div class="order-item">
+                        <span>Subtotal</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="order-item">
+                        <span>Shipping</span>
+                        <span>FREE</span>
+                    </div>
+                    <div class="order-item">
+                        <span>Tax</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="order-total">
+                        <span>Total Due</span>
+                        <span>$0.00</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">🔒 Complete Purchase</button>
+                <div class="security">
+                    <p class="security-badge">🔐 SSL Encrypted | 🛡️ Fraud Protected | ✓ PCI Compliant</p>
+                </div>
+            </form>
+
+            <a href="/cart" class="back-link">← Back to Cart</a>
+        </div>
+
+        <script>
+            function handleCheckout(event) {
+                event.preventDefault();
+                alert('Payment processing: This would connect to Stripe in production. ✅ Order placed successfully!');
+                window.location.href = '/orders';
+            }
+        </script>
+    </body>
+    </html>
+    `;
+}
+
+function generateLoginPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+            .login-container { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 400px; width: 100%; }
+            .login-header { text-align: center; margin-bottom: 30px; }
+            .login-header h1 { font-size: 2em; color: #667eea; margin-bottom: 10px; }
+            .login-header p { color: #666; }
+            .form-group { margin-bottom: 20px; }
+            .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+            .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; }
+            .form-group input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+            .remember-forgot { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+            .remember-forgot a { color: #667eea; text-decoration: none; font-size: 0.9em; }
+            .remember-forgot a:hover { text-decoration: underline; }
+            .btn { width: 100%; padding: 12px; border-radius: 6px; border: none; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: all 0.3s; }
+            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .btn-primary:hover { transform: scale(1.02); }
+            .divider { text-align: center; margin: 20px 0; color: #999; }
+            .divider::before, .divider::after { content: ''; display: inline-block; width: 45%; height: 1px; background: #ddd; vertical-align: middle; }
+            .divider::before { margin-right: 10px; }
+            .divider::after { margin-left: 10px; }
+            .social-login { display: flex; gap: 10px; margin-bottom: 20px; }
+            .social-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+            .social-btn:hover { border-color: #667eea; background: #f9f9f9; }
+            .signup-link { text-align: center; margin-top: 20px; }
+            .signup-link p { color: #666; }
+            .signup-link a { color: #667eea; text-decoration: none; font-weight: bold; }
+            .signup-link a:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <div class="login-header">
+                <h1>👤 Login</h1>
+                <p>Welcome back to AI Marketplace</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••">
+                </div>
+
+                <div class="remember-forgot">
+                    <label style="display: flex; align-items: center; font-weight: normal;">
+                        <input type="checkbox" style="margin-right: 8px; width: auto;">
+                        Remember me
+                    </label>
+                    <a href="#forgot">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <div class="social-login">
+                <button class="social-btn">🔵 Google</button>
+                <button class="social-btn">🔵 GitHub</button>
+            </div>
+
+            <div class="signup-link">
+                <p>Don't have an account? <a href="/register">Create one</a></p>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="/" style="color: #667eea; text-decoration: none;">← Back to Home</a>
+            </div>
+        </div>
+
+        <script>
+            function handleLogin(event) {
+                event.preventDefault();
+                alert('Logged in successfully! 🎉');
+                window.location.href = '/dashboard';
+            }
+        </script>
+    </body>
+    </html>
+    `;
+}
+
+function generateRegisterPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Register - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+            .register-container { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 450px; width: 100%; }
+            .register-header { text-align: center; margin-bottom: 30px; }
+            .register-header h1 { font-size: 2em; color: #667eea; margin-bottom: 10px; }
+            .register-header p { color: #666; }
+            .form-group { margin-bottom: 20px; }
+            .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+            .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; }
+            .form-group input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+            .password-strength { margin-top: 8px; height: 4px; background: #ddd; border-radius: 2px; overflow: hidden; }
+            .strength-bar { height: 100%; width: 0%; background: #ff6b6b; }
+            .btn { width: 100%; padding: 12px; border-radius: 6px; border: none; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: all 0.3s; }
+            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .btn-primary:hover { transform: scale(1.02); }
+            .terms { font-size: 0.85em; color: #666; margin-bottom: 15px; }
+            .terms a { color: #667eea; text-decoration: none; }
+            .login-link { text-align: center; margin-top: 20px; }
+            .login-link p { color: #666; }
+            .login-link a { color: #667eea; text-decoration: none; font-weight: bold; }
+            .login-link a:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="register-container">
+            <div class="register-header">
+                <h1>✨ Create Account</h1>
+                <p>Join AI Marketplace today</p>
+            </div>
+
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" required placeholder="John Doe">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••" onkeyup="checkPasswordStrength(this.value)">
+                    <div class="password-strength">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                    <small style="color: #999;">At least 8 characters, mix of uppercase, lowercase, numbers and symbols</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm">Confirm Password</label>
+                    <input type="password" id="confirm" name="confirm" required placeholder="••••••••">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: flex-start; font-weight: normal;">
+                        <input type="checkbox" required style="margin-right: 8px; margin-top: 4px; width: auto;">
+                        <span class="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+
+            <div class="login-link">
+                <p>Already have an account? <a href="/login">Sign in</a></p>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="/" style="color: #667eea; text-decoration: none;">← Back to Home</a>
+            </div>
+        </div>
+
+        <script>
+            function checkPasswordStrength(password) {
+                let strength = 0;
+                if (password.length >= 8) strength += 25;
+                if (/[A-Z]/.test(password)) strength += 25;
+                if (/[0-9]/.test(password)) strength += 25;
+                if (/[^a-zA-Z0-9]/.test(password)) strength += 25;
+                document.getElementById('strengthBar').style.width = strength + '%';
+            }
+            function handleRegister(event) {
+                event.preventDefault();
+                alert('Account created successfully! 🎉');
+                window.location.href = '/login';
+            }
+        </script>
+    </body>
+    </html>
+    `;
+}
+
+function generateDashboardPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 1200px; margin: 0 auto; }
+            .header { color: white; margin-bottom: 30px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+            .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+            .stat-icon { font-size: 2.5em; margin-bottom: 10px; }
+            .stat-value { font-size: 2em; font-weight: bold; color: #667eea; }
+            .stat-label { color: #666; font-size: 0.95em; margin-top: 5px; }
+            .dashboard-section { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 30px; }
+            .section-title { font-size: 1.5em; color: #667eea; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #667eea; }
+            .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+            .action-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold; transition: all 0.3s; border: none; cursor: pointer; }
+            .action-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+            .recent-activity { margin-top: 20px; }
+            .activity-item { padding: 15px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 10px; }
+            .activity-item:last-child { margin-bottom: 0; }
+            .activity-time { color: #999; font-size: 0.85em; }
+            .activity-title { font-weight: bold; color: #333; margin-bottom: 5px; }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>📊 Welcome Back!</h1>
+                <p>Here's your account dashboard</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🛒</div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Active Subscriptions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value">$647</div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Orders Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value">98%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="quick-actions">
+                    <a href="/shop" class="action-btn">🛍️ Browse Products</a>
+                    <a href="/orders" class="action-btn">📋 View Orders</a>
+                    <a href="/account" class="action-btn">⚙️ Account Settings</a>
+                    <a href="/support" class="action-btn">💬 Get Support</a>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2 class="section-title">Recent Activity</h2>
+                <div class="recent-activity">
+                    <div class="activity-item">
+                        <div class="activity-time">2 hours ago</div>
+                        <div class="activity-title">✓ Renewed AI Content Generator subscription</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">1 day ago</div>
+                        <div class="activity-title">📊 Generated 847 words with AI Content Generator</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">3 days ago</div>
+                        <div class="activity-title">💳 Payment of $99.00 processed successfully</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">1 week ago</div>
+                        <div class="activity-title">✓ Added SEO Optimization Tool to subscriptions</div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateOrdersPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>My Orders - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 1000px; margin: 0 auto; }
+            .header { color: white; margin-bottom: 30px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .orders-list { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+            .order-item { border: 1px solid #eee; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+            .order-item:last-child { margin-bottom: 0; }
+            .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+            .order-id { font-weight: bold; color: #667eea; font-size: 1.1em; }
+            .order-date { color: #666; font-size: 0.9em; }
+            .order-status { padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85em; }
+            .status-completed { background: #d4edda; color: #155724; }
+            .status-pending { background: #fff3cd; color: #856404; }
+            .order-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 15px; }
+            .detail-item { }
+            .detail-label { color: #666; font-size: 0.85em; margin-bottom: 5px; }
+            .detail-value { font-weight: bold; color: #333; }
+            .order-items { background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+            .order-items h4 { color: #667eea; margin-bottom: 10px; }
+            .item-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+            .item-line:last-child { border-bottom: none; }
+            .action-links { display: flex; gap: 10px; }
+            .action-link { color: #667eea; text-decoration: none; font-weight: 500; padding: 8px 15px; border: 1px solid #667eea; border-radius: 4px; transition: all 0.3s; }
+            .action-link:hover { background: #667eea; color: white; }
+            .empty-orders { text-align: center; padding: 40px; }
+            .empty-icon { font-size: 3em; margin-bottom: 15px; }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>📋 My Orders</h1>
+                <p>Track your purchases and subscriptions</p>
+            </div>
+
+            <div class="orders-list">
+                <div class="order-item">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #ORD-2025-001</div>
+                            <div class="order-date">January 15, 2025</div>
+                        </div>
+                        <span class="order-status status-completed">✓ Completed</span>
+                    </div>
+                    <div class="order-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Total Amount</div>
+                            <div class="detail-value">$99.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Payment Method</div>
+                            <div class="detail-value">Credit Card</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Delivery</div>
+                            <div class="detail-value">Instant (Digital)</div>
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        <h4>Items in Order</h4>
+                        <div class="item-line">
+                            <span>AI Content Generator (1 month)</span>
+                            <strong>$99.00</strong>
+                        </div>
+                    </div>
+                    <div class="action-links">
+                        <a href="#" class="action-link">📧 Receipt</a>
+                        <a href="#" class="action-link">❓ Support</a>
+                        <a href="#" class="action-link">♻️ Renew</a>
+                    </div>
+                </div>
+
+                <div class="order-item">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #ORD-2025-002</div>
+                            <div class="order-date">January 8, 2025</div>
+                        </div>
+                        <span class="order-status status-completed">✓ Completed</span>
+                    </div>
+                    <div class="order-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Total Amount</div>
+                            <div class="detail-value">$149.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Payment Method</div>
+                            <div class="detail-value">Credit Card</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Delivery</div>
+                            <div class="detail-value">Instant (Digital)</div>
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        <h4>Items in Order</h4>
+                        <div class="item-line">
+                            <span>SEO Optimization Tool (1 month)</span>
+                            <strong>$149.00</strong>
+                        </div>
+                    </div>
+                    <div class="action-links">
+                        <a href="#" class="action-link">📧 Receipt</a>
+                        <a href="#" class="action-link">❓ Support</a>
+                        <a href="#" class="action-link">♻️ Renew</a>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateAccountPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Account Settings - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .header { color: white; margin-bottom: 30px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .settings-container { background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
+            .settings-sidebar { background: #f9f9f9; padding: 20px; border-right: 1px solid #eee; }
+            .settings-tabs { display: flex; flex-direction: column; gap: 10px; }
+            .tab-btn { padding: 12px 20px; border: none; background: transparent; text-align: left; cursor: pointer; color: #666; transition: all 0.3s; font-weight: 500; }
+            .tab-btn:hover, .tab-btn.active { background: #667eea; color: white; border-left: 4px solid #764ba2; }
+            .settings-content { padding: 40px; }
+            .form-group { margin-bottom: 25px; }
+            .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+            .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; }
+            .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+            .form-buttons { display: flex; gap: 10px; margin-top: 30px; }
+            .btn { padding: 12px 30px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .btn-primary:hover { transform: scale(1.02); }
+            .btn-danger { background: #ff6b6b; color: white; }
+            .btn-danger:hover { background: #ff5252; }
+            .btn-secondary { background: #f0f0f0; color: #667eea; }
+            .btn-secondary:hover { background: #e0e0e0; }
+            .back-link { display: inline-block; margin: 20px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+            .section-title { font-size: 1.3em; color: #667eea; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #667eea; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>⚙️ Account Settings</h1>
+                <p>Manage your profile and preferences</p>
+            </div>
+
+            <div class="settings-container">
+                <div class="settings-sidebar">
+                    <div class="settings-tabs">
+                        <button class="tab-btn active">👤 Profile</button>
+                        <button class="tab-btn">🔐 Security</button>
+                        <button class="tab-btn">🔔 Notifications</button>
+                        <button class="tab-btn">💳 Billing</button>
+                        <button class="tab-btn">🗑️ Danger Zone</button>
+                    </div>
+                </div>
+
+                <div class="settings-content">
+                    <h2 class="section-title">Profile Information</h2>
+
+                    <div class="form-group">
+                        <label for="fullname">Full Name</label>
+                        <input type="text" id="fullname" name="fullname" value="John Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" value="john@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" value="+1 (555) 123-4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company" name="company" value="Acme Inc.">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <input type="text" id="bio" name="bio" value="AI enthusiast and digital marketer">
+                    </div>
+
+                    <h2 class="section-title" style="margin-top: 40px;">Preferences</h2>
+
+                    <div class="form-group">
+                        <label for="timezone">Timezone</label>
+                        <select id="timezone">
+                            <option>Eastern Time (ET)</option>
+                            <option>Central Time (CT)</option>
+                            <option>Mountain Time (MT)</option>
+                            <option>Pacific Time (PT)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" checked> Receive email notifications about new features
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" checked> Receive promotional offers and updates
+                        </label>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button class="btn btn-primary">💾 Save Changes</button>
+                        <button class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+function generateSupportPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Support - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 1000px; margin: 0 auto; }
+            .header { color: white; text-align: center; margin-bottom: 40px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .support-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 40px; }
+            .support-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; transition: all 0.3s; }
+            .support-card:hover { transform: translateY(-10px); }
+            .support-icon { font-size: 3em; margin-bottom: 15px; }
+            .support-title { font-size: 1.3em; color: #667eea; font-weight: bold; margin-bottom: 10px; }
+            .support-desc { color: #666; line-height: 1.6; }
+            .support-link { display: inline-block; margin-top: 15px; padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: all 0.3s; }
+            .support-link:hover { transform: scale(1.05); }
+            .faq-section { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+            .faq-title { font-size: 1.8em; color: #667eea; margin-bottom: 30px; }
+            .faq-item { margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; }
+            .faq-question { padding: 20px; background: #f9f9f9; cursor: pointer; font-weight: bold; color: #667eea; transition: all 0.3s; }
+            .faq-question:hover { background: #667eea; color: white; }
+            .faq-answer { padding: 20px; display: none; color: #666; line-height: 1.8; }
+            .faq-answer.show { display: block; }
+            .contact-form { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-top: 30px; }
+            .form-group { margin-bottom: 20px; }
+            .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+            .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; font-family: inherit; }
+            .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+            .btn { width: 100%; padding: 12px; border-radius: 6px; border: none; font-weight: bold; font-size: 1.1em; cursor: pointer; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; transition: all 0.3s; }
+            .btn:hover { transform: scale(1.02); }
+            .back-link { display: inline-block; margin: 30px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>📞 Support Center</h1>
+                <p>We're here to help! Choose your preferred support method.</p>
+            </div>
+
+            <div class="support-grid">
+                <div class="support-card">
+                    <div class="support-icon">💬</div>
+                    <div class="support-title">Live Chat</div>
+                    <p class="support-desc">Chat with our support team in real-time. Available Mon-Fri, 9AM-6PM EST.</p>
+                    <a href="#" class="support-link">Start Chat →</a>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">📧</div>
+                    <div class="support-title">Email Support</div>
+                    <p class="support-desc">Send us an email and we'll respond within 24 hours.</p>
+                    <a href="mailto:support@ai-market.com" class="support-link">Send Email →</a>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">📞</div>
+                    <div class="support-title">Phone Support</div>
+                    <p class="support-desc">Call our support hotline for urgent issues.</p>
+                    <a href="tel:+15551234567" class="support-link">Call Now →</a>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">📚</div>
+                    <div class="support-title">Knowledge Base</div>
+                    <p class="support-desc">Browse our comprehensive documentation and tutorials.</p>
+                    <a href="/faq" class="support-link">View Docs →</a>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">🎓</div>
+                    <div class="support-title">Video Tutorials</div>
+                    <p class="support-desc">Learn how to use our tools with step-by-step videos.</p>
+                    <a href="#" class="support-link">Watch Now →</a>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">🚀</div>
+                    <div class="support-title">Getting Started</div>
+                    <p class="support-desc">New user? Get started with our onboarding guide.</p>
+                    <a href="#" class="support-link">Start Guide →</a>
+                </div>
+            </div>
+
+            <div class="faq-section">
+                <h2 class="faq-title">Frequently Asked Questions</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">How do I get started?</div>
+                    <div class="faq-answer">Sign up for a free account, choose your products, and start using them immediately. Our team will guide you through the onboarding process.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">What payment methods do you accept?</div>
+                    <div class="faq-answer">We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for enterprise customers.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">Do you offer refunds?</div>
+                    <div class="faq-answer">Yes! We offer a 30-day money-back guarantee on all products. If you're not satisfied, contact us for a full refund.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">Can I cancel my subscription anytime?</div>
+                    <div class="faq-answer">Absolutely! You can cancel your subscription at any time from your dashboard. No hidden fees or long-term contracts.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">Is there a free trial?</div>
+                    <div class="faq-answer">Yes! All products come with a 14-day free trial. No credit card required to start your trial.</div>
+                </div>
+            </div>
+
+            <div class="contact-form">
+                <h2 style="color: #667eea; margin-bottom: 20px;">Send us a Message</h2>
+                <form onsubmit="handleSupportForm(event)">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="6" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+
+        <script>
+            function toggleFaq(element) {
+                const answer = element.nextElementSibling;
+                answer.classList.toggle('show');
+            }
+            function handleSupportForm(event) {
+                event.preventDefault();
+                alert('Thank you! Your message has been sent. We\'ll respond within 24 hours.');
+            }
+        </script>
+    </body>
+    </html>
+    `;
+}
+
+function generateFaqPage() {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>FAQ - AI Marketplace</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+            .container { max-width: 900px; margin: 0 auto; }
+            .header { color: white; text-align: center; margin-bottom: 40px; }
+            .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+            .faq-container { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+            .faq-section { margin-bottom: 40px; }
+            .faq-section-title { font-size: 1.6em; color: #667eea; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+            .faq-item { margin-bottom: 15px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+            .faq-question { padding: 20px; background: #f9f9f9; cursor: pointer; font-weight: bold; color: #667eea; transition: all 0.3s; display: flex; justify-content: space-between; align-items: center; }
+            .faq-question:hover { background: #667eea; color: white; }
+            .faq-toggle { font-size: 1.3em; }
+            .faq-answer { padding: 20px; display: none; color: #666; line-height: 1.8; background: #fafafa; }
+            .faq-answer.show { display: block; }
+            .back-link { display: inline-block; margin: 30px 0; color: white; text-decoration: none; font-weight: 500; }
+            .back-link:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            ${generateNavigation()}
+            <div class="header">
+                <h1>❓ Frequently Asked Questions</h1>
+                <p>Find answers to common questions about AI Marketplace</p>
+            </div>
+
+            <div class="faq-container">
+                <div class="faq-section">
+                    <h2 class="faq-section-title">Getting Started</h2>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>How do I create an account?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Click on the "Sign Up" button, enter your email, choose a password, and you're all set! You can start using our free trial immediately without needing a payment method.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>What is the free trial period?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">All of our products come with a 14-day free trial. You get full access to all features during your trial period. No credit card required!</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>How do I upgrade to a paid plan?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Once your trial period ends, you can upgrade to a paid subscription from your dashboard. Choose your preferred plan and add your payment information. Your subscription will activate immediately.</div>
+                    </div>
+                </div>
+
+                <div class="faq-section">
+                    <h2 class="faq-section-title">Billing & Payments</h2>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>What payment methods do you accept?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for enterprise customers. All transactions are processed securely using industry-standard encryption.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Can I change or cancel my subscription?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Yes! You can upgrade, downgrade, or cancel your subscription at any time from your dashboard. Changes take effect on your next billing date. No hidden fees or penalties.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Do you offer a money-back guarantee?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Yes! We offer a 30-day money-back guarantee on all products. If you're not satisfied with your purchase for any reason, contact our support team for a full refund.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>How often will I be billed?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">We offer monthly and annual billing options. Monthly subscriptions renew on the same day each month. Annual subscriptions renew yearly. You can change your billing frequency anytime.</div>
+                    </div>
+                </div>
+
+                <div class="faq-section">
+                    <h2 class="faq-section-title">Features & Usage</h2>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>What features are included in each plan?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Each product has different tiers with varying features. Visit our pricing page to see detailed feature comparisons. All paid plans include priority support and access to new features.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Is there a limit on how much I can use?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Most of our tools have generous usage limits or unlimited access on higher-tier plans. Check the feature details for your specific product for usage limits and overages.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Can I use multiple products together?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Absolutely! Our tools are designed to work seamlessly together. You can subscribe to multiple products and manage all of them from your unified dashboard.</div>
+                    </div>
+                </div>
+
+                <div class="faq-section">
+                    <h2 class="faq-section-title">Support & Technical</h2>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>What kind of support is available?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">We offer live chat, email support, phone support, and a comprehensive knowledge base. Free users get email support, while paid customers get priority support with faster response times.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>How can I contact your support team?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">You can reach us via live chat (Mon-Fri 9AM-6PM EST), email at support@ai-market.com, or phone at +1 (555) 123-4567. Visit our <a href="/support" style="color: #667eea;">support center</a> for more options.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>What's your uptime guarantee?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">We maintain a 99.9% uptime SLA for all our services. In the rare event of an outage, we'll send notifications and work to restore service as quickly as possible.</div>
+                    </div>
+                </div>
+
+                <div class="faq-section">
+                    <h2 class="faq-section-title">Security & Privacy</h2>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Is my data secure?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">Yes! We use industry-standard SSL encryption, regular security audits, and comply with GDPR, CCPA, and other privacy regulations. Your data is stored in secure, redundant data centers.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Do you share my data with third parties?</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">No. We never sell your data or share it with third parties without your explicit consent. Read our privacy policy for complete details on how we handle your information.</div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/support" class="back-link">← Back to Support</a>
+        </div>
+
+        <script>
+            function toggleFaq(element) {
+                const answer = element.parentElement.querySelector('.faq-answer');
+                const toggle = element.querySelector('.faq-toggle');
+                answer.classList.toggle('show');
+                toggle.textContent = answer.classList.contains('show') ? '−' : '+';
+            }
+        </script>
+    </body>
+    </html>
+    `;
 }
