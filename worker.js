@@ -117,6 +117,43 @@ export default {
             });
         }
 
+        // Admin Pages
+        if (url.pathname === "/admin") {
+            return new Response(generateAdminDashboard(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/admin/analytics") {
+            return new Response(generateAnalyticsPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/admin/products") {
+            return new Response(generateProductsManagementPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/admin/orders") {
+            return new Response(generateOrdersManagementPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/admin/customers") {
+            return new Response(generateCustomersManagementPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
+        if (url.pathname === "/admin/settings") {
+            return new Response(generateAdminSettingsPage(), {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+
         // Elite AI Prompt Autonomous Agent Endpoints
         if (url.pathname.startsWith("/api/autonomous-agent")) {
             return handleAutonomousAgent(request, env);
