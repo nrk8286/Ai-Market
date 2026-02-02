@@ -1,5 +1,5 @@
 # Cloudflare Workers Configuration
-name = "ai-marketplace"
+name = "ai-market-plus"
 account_id = "fad03f88124cd8f1979d1564faf4c026"
 workers_dev = true
 compatibility_date = "2026-02-01"
