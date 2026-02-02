@@ -199,6 +199,103 @@ export default {
             return handleGumroadWebhook(request, env);
         }
 
+        // ===== NEW API ENDPOINTS =====
+
+        // Shopping Cart API
+        if (url.pathname === '/api/cart' && request.method === 'GET') {
+            return handleGetCart(request);
+        }
+
+        if (url.pathname === '/api/cart/add' && request.method === 'POST') {
+            return handleAddToCart(request);
+        }
+
+        if (url.pathname === '/api/cart/remove' && request.method === 'POST') {
+            return handleRemoveFromCart(request);
+        }
+
+        if (url.pathname === '/api/cart/clear' && request.method === 'POST') {
+            return handleClearCart(request);
+        }
+
+        // Product Search & Filter API
+        if (url.pathname === '/api/products/search' && request.method === 'GET') {
+            return handleProductSearch(request);
+        }
+
+        if (url.pathname === '/api/products/filter' && request.method === 'GET') {
+            return handleProductFilter(request);
+        }
+
+        // Wishlist API
+        if (url.pathname === '/api/wishlist' && request.method === 'GET') {
+            return handleGetWishlist(request);
+        }
+
+        if (url.pathname === '/api/wishlist/add' && request.method === 'POST') {
+            return handleAddToWishlist(request);
+        }
+
+        if (url.pathname === '/api/wishlist/remove' && request.method === 'POST') {
+            return handleRemoveFromWishlist(request);
+        }
+
+        // User Profile API
+        if (url.pathname === '/api/user/profile' && request.method === 'GET') {
+            return handleGetProfile(request);
+        }
+
+        if (url.pathname === '/api/user/profile' && request.method === 'PUT') {
+            return handleUpdateProfile(request);
+        }
+
+        // Product Reviews API
+        if (url.pathname === '/api/reviews' && request.method === 'GET') {
+            return handleGetReviews(request);
+        }
+
+        if (url.pathname === '/api/reviews' && request.method === 'POST') {
+            return handleCreateReview(request);
+        }
+
+        // Orders API
+        if (url.pathname === '/api/orders' && request.method === 'GET') {
+            return handleGetOrders(request);
+        }
+
+        if (url.pathname === '/api/orders' && request.method === 'POST') {
+            return handleCreateOrder(request);
+        }
+
+        const orderMatch = url.pathname.match(/^\/api\/orders\/(.+)$/);
+        if (orderMatch && request.method === 'GET') {
+            return handleGetOrderDetail(request, orderMatch[1]);
+        }
+
+        // Subscriptions API
+        if (url.pathname === '/api/subscriptions' && request.method === 'GET') {
+            return handleGetSubscriptions(request);
+        }
+
+        if (url.pathname === '/api/subscriptions' && request.method === 'POST') {
+            return handleCreateSubscription(request);
+        }
+
+        // Analytics API
+        if (url.pathname === '/api/analytics/summary' && request.method === 'GET') {
+            return handleAnalyticsSummary(request);
+        }
+
+        // Search across all products and content
+        if (url.pathname === '/api/search' && request.method === 'GET') {
+            return handleGlobalSearch(request);
+        }
+
+        // Product recommendations
+        if (url.pathname === '/api/recommendations' && request.method === 'GET') {
+            return handleGetRecommendations(request);
+        }
+
         // Marketplace Connect onboarding
         if (url.pathname.startsWith('/marketplace/connect/onboard')) {
             return handleConnectOnboard(request, env);
@@ -3877,3 +3974,301 @@ function generateFaqPage() {
     </html>
     `;
 }
+
+// ===== API HANDLER FUNCTIONS =====
+
+// Shopping Cart Handlers
+async function handleGetCart(request) {
+    const cartData = JSON.parse(localStorage.getItem('cart') || '{"items":[],"total":0,"count":0}');
+    return new Response(JSON.stringify(cartData), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleAddToCart(request) {
+    try {
+        const { productId, quantity = 1, productName, productPrice } = await request.json();
+        const cartData = JSON.parse(localStorage.getItem('cart') || '{"items":[],"total":0,"count":0}');
+        
+        const existingItem = cartData.items.find(item => item.productId === productId);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            cartData.items.push({ productId, productName, productPrice, quantity });
+        }
+        
+        cartData.count = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
+        cartData.total = cartData.items.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0);
+        
+        localStorage.setItem('cart', JSON.stringify(cartData));
+        return new Response(JSON.stringify({ success: true, cart: cartData }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+async function handleRemoveFromCart(request) {
+    try {
+        const { productId } = await request.json();
+        const cartData = JSON.parse(localStorage.getItem('cart') || '{"items":[],"total":0,"count":0}');
+        cartData.items = cartData.items.filter(item => item.productId !== productId);
+        cartData.count = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
+        cartData.total = cartData.items.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0);
+        localStorage.setItem('cart', JSON.stringify(cartData));
+        return new Response(JSON.stringify({ success: true, cart: cartData }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+async function handleClearCart(request) {
+    localStorage.setItem('cart', JSON.stringify({ items: [], total: 0, count: 0 }));
+    return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+// Product Search & Filter Handlers
+async function handleProductSearch(request) {
+    const url = new URL(request.url);
+    const query = url.searchParams.get('q')?.toLowerCase() || '';
+    
+    const allProducts = [
+        { id: 1, name: 'AI Content Generator', category: 'Content', price: 99, rating: 4.9 },
+        { id: 2, name: 'SEO Optimization Tool', category: 'SEO', price: 149, rating: 4.8 },
+        { id: 3, name: 'Analytics Dashboard', category: 'Analytics', price: 199, rating: 4.9 },
+        { id: 4, name: 'Automation Suite', category: 'Automation', price: 299, rating: 4.7 }
+    ];
+    
+    const results = allProducts.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.category.toLowerCase().includes(query)
+    );
+    
+    return new Response(JSON.stringify({ query, results, count: results.length }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleProductFilter(request) {
+    const url = new URL(request.url);
+    const category = url.searchParams.get('category');
+    const minPrice = parseFloat(url.searchParams.get('minPrice') || '0');
+    const maxPrice = parseFloat(url.searchParams.get('maxPrice') || '10000');
+    const minRating = parseFloat(url.searchParams.get('minRating') || '0');
+    
+    const allProducts = [
+        { id: 1, name: 'AI Content Generator', category: 'Content', price: 99, rating: 4.9 },
+        { id: 2, name: 'SEO Optimization Tool', category: 'SEO', price: 149, rating: 4.8 },
+        { id: 3, name: 'Analytics Dashboard', category: 'Analytics', price: 199, rating: 4.9 },
+        { id: 4, name: 'Automation Suite', category: 'Automation', price: 299, rating: 4.7 }
+    ];
+    
+    const filtered = allProducts.filter(p => {
+        if (category && p.category !== category) return false;
+        if (p.price < minPrice || p.price > maxPrice) return false;
+        if (p.rating < minRating) return false;
+        return true;
+    });
+    
+    return new Response(JSON.stringify({ filters: { category, minPrice, maxPrice, minRating }, results: filtered }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+// Wishlist Handlers
+async function handleGetWishlist(request) {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    return new Response(JSON.stringify({ items: wishlist, count: wishlist.length }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleAddToWishlist(request) {
+    try {
+        const { productId, productName, productPrice } = await request.json();
+        const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        
+        if (!wishlist.find(item => item.productId === productId)) {
+            wishlist.push({ productId, productName, productPrice, addedDate: new Date().toISOString() });
+        }
+        
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        return new Response(JSON.stringify({ success: true, wishlist }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+async function handleRemoveFromWishlist(request) {
+    try {
+        const { productId } = await request.json();
+        const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        const filtered = wishlist.filter(item => item.productId !== productId);
+        localStorage.setItem('wishlist', JSON.stringify(filtered));
+        return new Response(JSON.stringify({ success: true, wishlist: filtered }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// User Profile Handlers
+async function handleGetProfile(request) {
+    const profile = JSON.parse(localStorage.getItem('userProfile') || '{"name":"","email":"","company":"","phone":""}');
+    return new Response(JSON.stringify(profile), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleUpdateProfile(request) {
+    try {
+        const profile = await request.json();
+        localStorage.setItem('userProfile', JSON.stringify(profile));
+        return new Response(JSON.stringify({ success: true, profile }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Reviews Handlers
+async function handleGetReviews(request) {
+    const url = new URL(request.url);
+    const productId = url.searchParams.get('productId');
+    
+    const reviews = [
+        { id: 1, productId: '1', author: 'John Doe', rating: 5, text: 'Amazing tool! Saved me hours.', date: '2025-01-15' },
+        { id: 2, productId: '1', author: 'Jane Smith', rating: 5, text: 'Best investment for content creation.', date: '2025-01-10' },
+        { id: 3, productId: '2', author: 'Mike Johnson', rating: 4, text: 'Great features, small learning curve.', date: '2025-01-05' }
+    ];
+    
+    const productReviews = productId ? reviews.filter(r => r.productId === productId) : reviews;
+    return new Response(JSON.stringify({ reviews: productReviews, total: productReviews.length }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleCreateReview(request) {
+    try {
+        const review = await request.json();
+        const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+        review.id = Math.max(...reviews.map(r => r.id), 0) + 1;
+        review.date = new Date().toISOString().split('T')[0];
+        reviews.push(review);
+        localStorage.setItem('reviews', JSON.stringify(reviews));
+        return new Response(JSON.stringify({ success: true, review }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Orders Handlers
+async function handleGetOrders(request) {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[{"id":"ORD-2025-001","date":"2025-01-15","total":99,"status":"completed"},{"id":"ORD-2025-002","date":"2025-01-08","total":149,"status":"completed"}]');
+    return new Response(JSON.stringify({ orders, count: orders.length }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleCreateOrder(request) {
+    try {
+        const orderData = await request.json();
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const newOrder = {
+            id: `ORD-${Date.now()}`,
+            date: new Date().toISOString().split('T')[0],
+            total: orderData.total,
+            items: orderData.items,
+            status: 'pending',
+            ...orderData
+        };
+        orders.push(newOrder);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        return new Response(JSON.stringify({ success: true, order: newOrder }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+async function handleGetOrderDetail(request, orderId) {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return new Response(JSON.stringify({ error: 'Order not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify(order), { headers: { 'Content-Type': 'application/json' } });
+}
+
+// Subscriptions Handlers
+async function handleGetSubscriptions(request) {
+    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[{"id":1,"name":"AI Content Generator","status":"active","renewDate":"2025-02-15"},{"id":2,"name":"SEO Tool","status":"active","renewDate":"2025-02-10"}]');
+    return new Response(JSON.stringify({ subscriptions, active: subscriptions.filter(s => s.status === 'active').length }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function handleCreateSubscription(request) {
+    try {
+        const subData = await request.json();
+        const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+        const newSub = {
+            id: Math.max(...subscriptions.map(s => s.id), 0) + 1,
+            status: 'active',
+            startDate: new Date().toISOString().split('T')[0],
+            ...subData
+        };
+        subscriptions.push(newSub);
+        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+        return new Response(JSON.stringify({ success: true, subscription: newSub }), { headers: { 'Content-Type': 'application/json' } });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+}
+
+// Analytics Handlers
+async function handleAnalyticsSummary(request) {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+    
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const totalOrders = orders.length;
+    const activeSubscriptions = subscriptions.filter(s => s.status === 'active').length;
+    
+    return new Response(JSON.stringify({
+        totalRevenue,
+        totalOrders,
+        activeSubscriptions,
+        avgOrderValue: totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0,
+        conversionRate: '3.2%',
+        customerSatisfaction: '4.8/5'
+    }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+// Global Search Handler
+async function handleGlobalSearch(request) {
+    const url = new URL(request.url);
+    const query = url.searchParams.get('q')?.toLowerCase() || '';
+    
+    if (!query || query.length < 2) {
+        return new Response(JSON.stringify({ results: [], message: 'Search query too short' }), { headers: { 'Content-Type': 'application/json' } });
+    }
+    
+    const searchResults = {
+        products: [
+            { id: 1, name: 'AI Content Generator', type: 'product', url: '/products/ai-content-generator' },
+            { id: 2, name: 'SEO Optimization Tool', type: 'product', url: '/products/seo-tool' }
+        ],
+        pages: [
+            { title: 'About Us', type: 'page', url: '/about' },
+            { title: 'Contact Support', type: 'page', url: '/support' }
+        ],
+        articles: [
+            { title: 'Getting Started Guide', type: 'article', url: '#' },
+            { title: 'API Documentation', type: 'article', url: '#' }
+        ]
+    };
+    
+    const allResults = [
+        ...searchResults.products,
+        ...searchResults.pages,
+        ...searchResults.articles
+    ].filter(item => item.name?.toLowerCase().includes(query) || item.title?.toLowerCase().includes(query));
+    
+    return new Response(JSON.stringify({ query, results: allResults, count: allResults.length }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+// Recommendations Handler
+async function handleGetRecommendations(request) {
+    const url = new URL(request.url);
+    const category = url.searchParams.get('category') || 'all';
+    
+    const recommendations = [
+        { id: 1, name: 'AI Content Generator', category: 'Content', score: 0.95, reason: 'Popular with your interests' },
+        { id: 2, name: 'SEO Optimization Tool', category: 'SEO', score: 0.88, reason: 'Often bought together' },
+        { id: 3, name: 'Analytics Dashboard', category: 'Analytics', score: 0.82, reason: 'Trending this month' },
+        { id: 4, name: 'Automation Suite', category: 'Automation', score: 0.79, reason: 'Customers like you prefer this' }
+    ];
+    
+    const filtered = category === 'all' ? recommendations : recommendations.filter(r => r.category === category);
+    return new Response(JSON.stringify({ recommendations: filtered.slice(0, 4) }), { headers: { 'Content-Type': 'application/json' } });
+}
+
