@@ -2,7 +2,7 @@
 name = "ai-marketplace"
 account_id = "beab7f47997d4b33b1b477d39881b90a"
 workers_dev = true
-compatibility_date = "2026-01-31"
+compatibility_date = "2026-02-01"
 compatibility_flags = ["nodejs_compat"]
 main = "worker.js"
 
