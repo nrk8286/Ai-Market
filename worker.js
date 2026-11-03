@@ -2514,13 +2514,19 @@ async function handleGumroadWebhook(request, env) {
 
         const payloadText = await request.text();
         let payload;
-        // If secret is provided, verify signature header or body parameter
+        const { default: ConfigStore } = await import('./src/services/ConfigStore.cjs');
+        const configStore = new ConfigStore({ useFile: true });
+        const configuredSecret = (configStore.get('gumroad') || {}).secret;
+        const webhookSecret = env.GUMROAD_SECRET || configuredSecret;
         const gumSig = request.headers.get('gumroad-signature') || request.headers.get('Gumroad-Signature') || null;
 
-        if (env.GUMROAD_SECRET && gumSig) {
+        if (webhookSecret) {
+            if (!gumSig) {
+                return new Response(JSON.stringify({ error: 'Missing gumroad signature' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
             // Verify using HMAC SHA1 over payloadText
-            const crypto = require('crypto');
-            const expected = crypto.createHmac('sha1', env.GUMROAD_SECRET).update(payloadText).digest('hex');
+            const crypto = await import('node:crypto');
+            const expected = crypto.createHmac('sha1', webhookSecret).update(payloadText).digest('hex');
             if (expected !== gumSig) {
                 return new Response(JSON.stringify({ error: 'Invalid gumroad signature' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
             }
@@ -2577,7 +2583,8 @@ async function handleAdmin(request, env) {
             if (request.method === 'GET') {
                 const { default: ConfigStore } = await import('./src/services/ConfigStore.cjs');
                 const configStore = new ConfigStore({ useFile: true });
-                return new Response(JSON.stringify({ success: true, config: configStore.get('gumroad') || {} }), { headers: { 'Content-Type': 'application/json' } });
+                const { secret, ...config } = configStore.get('gumroad') || {};
+                return new Response(JSON.stringify({ success: true, config: { ...config, secretConfigured: Boolean(secret) } }), { headers: { 'Content-Type': 'application/json' } });
             }
 
             if (request.method === 'POST') {
@@ -2586,9 +2593,9 @@ async function handleAdmin(request, env) {
                 const configStore = new ConfigStore({ useFile: true });
                 const existing = configStore.get('gumroad') || {};
                 const next = Object.assign({}, existing, body);
-                // Do not store raw secrets unless explicitly requested; keep secret fields under 'secret' key
                 configStore.set('gumroad', next);
-                return new Response(JSON.stringify({ success: true, config: next }), { headers: { 'Content-Type': 'application/json' } });
+                const { secret, ...config } = next;
+                return new Response(JSON.stringify({ success: true, config: { ...config, secretConfigured: Boolean(secret) } }), { headers: { 'Content-Type': 'application/json' } });
             }
         }
 
