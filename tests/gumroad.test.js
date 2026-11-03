@@ -41,4 +41,30 @@ describe('Gumroad integration', () => {
     const g = JSON.parse(gated.text);
     expect(g.success).toBe(true);
   });
+
+  test('POST /webhooks/gumroad rejects an unsigned sale when a secret is configured', async () => {
+    const env = { GUMROAD_SECRET: 'configured-secret' };
+    const payload = {
+      event_type: 'sale',
+      sale: {
+        id: 'forged-sale',
+        email: 'attacker@example.com',
+        custom_fields: { user_id: 'forged_gumroad_user' }
+      }
+    };
+
+    const webhook = await call('/webhooks/gumroad', 'POST', payload, {}, env);
+    expect(webhook.res.status).toBe(400);
+    expect(JSON.parse(webhook.text).error).toBe('Missing gumroad signature');
+
+    const gated = await call('/api/pro', 'GET', null, { 'X-USER-ID': 'forged_gumroad_user' }, env);
+    expect(gated.res.status).toBe(402);
+  });
+
+  test('POST /webhooks/gumroad rejects unsigned payloads outside test mode', async () => {
+    const webhook = await call('/webhooks/gumroad', 'POST', { event_type: 'sale' });
+
+    expect(webhook.res.status).toBe(503);
+    expect(JSON.parse(webhook.text).error).toBe('Gumroad webhook secret is not configured');
+  });
 });

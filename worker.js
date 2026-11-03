@@ -2514,10 +2514,14 @@ async function handleGumroadWebhook(request, env) {
 
         const payloadText = await request.text();
         let payload;
-        // If secret is provided, verify signature header or body parameter
+        // Verify every production webhook. Unsigned payloads are only accepted in
+        // explicit test mode when no webhook secret has been configured.
         const gumSig = request.headers.get('gumroad-signature') || request.headers.get('Gumroad-Signature') || null;
 
-        if (env.GUMROAD_SECRET && gumSig) {
+        if (env.GUMROAD_SECRET) {
+            if (!gumSig) {
+                return new Response(JSON.stringify({ error: 'Missing gumroad signature' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
             // Verify using HMAC SHA1 over payloadText
             const crypto = require('crypto');
             const expected = crypto.createHmac('sha1', env.GUMROAD_SECRET).update(payloadText).digest('hex');
@@ -2526,9 +2530,11 @@ async function handleGumroadWebhook(request, env) {
             }
             // If verified, parse JSON
             payload = JSON.parse(payloadText);
-        } else {
-            // Fallback: try parse JSON (test-mode/demo)
+        } else if (env.TEST_MODE === '1') {
+            // Fallback for tests only
             try { payload = JSON.parse(payloadText); } catch (err) { return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
+        } else {
+            return new Response(JSON.stringify({ error: 'Gumroad webhook secret is not configured' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
         }
 
         // Handle simplified sale event
