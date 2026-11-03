@@ -41,6 +41,20 @@ describe('Billing API', () => {
     // attach stripe customer to a different user and verify store
   });
 
+  test('Webhook rejects a missing signature when a webhook secret is configured', async () => {
+    const event = { type: 'checkout.session.completed', data: { object: { client_reference_id: 'attacker' } } };
+    const hook = await call('/webhooks/stripe', 'POST', event, {}, { TEST_MODE: '1', STRIPE_WEBHOOK_SECRET: 'whsec_test' });
+    expect(hook.res.status).toBe(400);
+
+    const gated = await call('/api/pro', 'GET', null, { 'X-USER-ID': 'attacker' }, { TEST_MODE: '1' });
+    expect(gated.res.status).toBe(402);
+  });
+
+  test('/api/pro does not trust X-USER-ID outside test mode', async () => {
+    const gated = await call('/api/pro', 'GET', null, { 'X-USER-ID': 'user_1' });
+    expect(gated.res.status).toBe(401);
+  });
+
   test('POST /billing/attach stores mapping (test-mode)', async () => {
     const env = { TEST_MODE: '1' };
     const res = await call('/billing/attach', 'POST', { userId: 'user_attach', customerId: 'cus_attach_1' }, {}, env);

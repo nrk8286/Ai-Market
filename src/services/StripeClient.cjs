@@ -62,7 +62,7 @@ class StripeClient {
   }
 
   verifyWebhook(payload, sigHeader, secret) {
-    if (this.client && secret) {
+    if (this.client && secret && sigHeader) {
       try {
         const event = this.client.webhooks.constructEvent(payload, sigHeader, secret);
         return event;
@@ -70,7 +70,10 @@ class StripeClient {
         throw err;
       }
     }
-    // fallback to JSON parse
+    if (this.client || secret || sigHeader) {
+      throw new Error('Stripe webhook signature verification is not configured correctly');
+    }
+    // Unsigned parsing is only for callers that explicitly enforce a safe test mode.
     try {
       return JSON.parse(payload);
     } catch (err) {

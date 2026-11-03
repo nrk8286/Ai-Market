@@ -2373,12 +2373,38 @@ function generatePricingPage() {
 }
 
 async function handleProFeature(request, env) {
-    const userId = request.headers.get('X-USER-ID');
-    if (!userId) return new Response(JSON.stringify({ error: 'Missing X-USER-ID header' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    const userId = await getAuthenticatedUserId(request, env);
+    if (!userId) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     const store = await getBillingStore();
     if (!store.hasActiveSubscription(userId)) return new Response(JSON.stringify({ error: 'Payment required' }), { status: 402, headers: { 'Content-Type': 'application/json' } });
     const customer = store.getCustomer(userId);
     return new Response(JSON.stringify({ success: true, message: 'Welcome to Pro features', customer }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+async function getAuthenticatedUserId(request, env) {
+    // Header-based identities are only permitted in the explicitly enabled local test mode.
+    if (env.TEST_MODE === '1') return request.headers.get('X-USER-ID');
+
+    const authorization = request.headers.get('Authorization') || '';
+    const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+    if (!token || !env.AUTH_TOKEN_SECRET) return null;
+
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    try {
+        const decode = value => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=')), char => char.charCodeAt(0));
+        const header = JSON.parse(new TextDecoder().decode(decode(parts[0])));
+        const claims = JSON.parse(new TextDecoder().decode(decode(parts[1])));
+        const now = Math.floor(Date.now() / 1000);
+        if (header.alg !== 'HS256' || !claims.sub || !claims.exp || claims.exp <= now || (claims.nbf && claims.nbf > now)) return null;
+
+        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(env.AUTH_TOKEN_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+        const valid = await crypto.subtle.verify('HMAC', key, decode(parts[2]), new TextEncoder().encode(`${parts[0]}.${parts[1]}`));
+        return valid ? String(claims.sub) : null;
+    } catch {
+        return null;
+    }
 }
 
 // POST /billing/attach { userId, customerId }
@@ -2420,6 +2446,10 @@ async function handleStripeWebhook(request, env) {
         const { default: StripeClient } = await import('./src/services/StripeClient.cjs');
         const stripe = new StripeClient(env.STRIPE_SECRET_KEY || '');
         const sig = request.headers.get('stripe-signature') || request.headers.get('Stripe-Signature');
+        const allowUnsignedTestWebhook = env.TEST_MODE === '1' && !env.STRIPE_SECRET_KEY && !env.STRIPE_WEBHOOK_SECRET;
+        if ((!sig || !env.STRIPE_WEBHOOK_SECRET || !env.STRIPE_SECRET_KEY) && !allowUnsignedTestWebhook) {
+            return new Response(JSON.stringify({ error: 'Webhook signature verification required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
         try {
             event = stripe.verifyWebhook(payload, sig, env.STRIPE_WEBHOOK_SECRET);
         } catch (err) {
@@ -5546,4 +5576,3 @@ async function handleGetPaymentStatus(request, env, paymentIntentId) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 }
-
