@@ -9,15 +9,16 @@ async function call(path, method='GET', body=null, headers={}, env={}){
 }
 
 describe('Marketplace connect & checkout', () => {
-  test('Connect onboard simulated link', async () => {
+  test('unimplemented Connect onboarding returns a structured unavailable response', async () => {
     const res = await call('/marketplace/connect/onboard', 'POST', { vendorId: 'vendor_1', returnUrl: 'https://example.com/ret', refreshUrl: 'https://example.com/ref' });
-    expect(res.res.status).toBe(200);
+    expect(res.res.status).toBe(501);
     const json = JSON.parse(res.text);
-    expect(json).toHaveProperty('url');
+    expect(json.error).toMatch(/not implemented/);
+    expect(json).not.toHaveProperty('url');
   });
 
   test('Checkout with vendor returns payment intent simulation', async () => {
-    const res = await call('/marketplace/checkout', 'POST', { itemId: 1, vendorId: 'vendor_1' });
+    const res = await call('/marketplace/checkout', 'POST', { itemId: 1, vendorId: 'vendor_1' }, {}, { TEST_MODE: '1' });
     expect(res.res.status).toBe(200);
     const json = JSON.parse(res.text);
     expect(json.paymentIntent).toHaveProperty('id');

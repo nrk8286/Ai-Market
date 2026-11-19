@@ -168,15 +168,16 @@ To set up the AI Marketplace locally, follow these steps:
    npm test
    ```
 
-Note: This repository includes a lightweight Node-based test runner (`scripts/run-tests.js`). Use `npm test` to run it locally — it is intentionally simple so tests run reliably when the project is nested inside other workspaces or `node_modules` folders.
+`npm test` runs the test-runner regression checks and the Jest unit/integration suite. `npm run test:e2e:wrangler` starts an isolated local Worker, runs its HTTP tests, and stops the server. `npm run test:light` remains available for lightweight checks when development dependencies are unavailable; Jest discovery or execution errors never fall back to it.
 
 Payments & Webhooks (Stripe)
 
 - Endpoints added:
-  - `POST /marketplace/checkout` — creates a demo checkout session for an item
+  - `POST /marketplace/checkout` — returns a PaymentIntent for an item from the product store. Simulated intents require `TEST_MODE=1`; missing payment configuration otherwise returns HTTP 503.
   - `POST /webhooks/stripe` — receives Stripe webhook events (verify `STRIPE_WEBHOOK_SECRET` in production)
+  - `/marketplace/connect/onboard` — returns HTTP 501 because authenticated Connect onboarding has not been implemented. Do not treat the demo marketplace as a production-ready payment integration.
 
-- Env vars to set: `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`
+- Store `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` as Worker secrets. Unsigned webhook fixtures are accepted only with `TEST_MODE=1` and no Stripe secrets configured. Use a restricted Stripe key with the required permissions where supported.
 
 Admin API
 
@@ -191,7 +192,7 @@ Datadog Synthetic example
 
 Preview deploy (CI)
 
-- A new CI job `e2e-preview` performs a `wrangler publish --dry-run` to validate packaging and runs lightweight E2E scripts. This job is gated behind Cloudflare secrets (`CF_API_TOKEN`, `CF_ACCOUNT_ID`).
+- The CI job `e2e-preview` performs `wrangler deploy --dry-run` to validate packaging and runs the lightweight E2E script. It does not deploy and does not require Cloudflare credentials. The separate `e2e-wrangler` job tests an isolated local Worker.
 
 ## Deploying to Cloudflare
 
