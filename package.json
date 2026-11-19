@@ -8,7 +8,7 @@
 		"start": "wrangler dev",
 		"deploy": "wrangler deploy",
 		"build": "echo 'Cloudflare Workers do not require a build step. Run: npm run deploy'",
-		"test": "node scripts/test.js",
+		"test": "node --test scripts/test-runner-regression.mjs && node scripts/test.js",
 		"test:jest": "jest --runInBand",
 		"test:watch": "jest --watchAll",
 		"test:coverage": "jest --coverage",
@@ -23,6 +23,9 @@
 		"stripe": "^20.3.0"
 	},
 	"devDependencies": {
+		"@babel/core": "7.29.13",
+		"@babel/preset-env": "7.29.14",
+		"babel-jest": "30.2.0",
 		"jest": "^30.2.0",
 		"wrangler": "^4.61.1"
 	},

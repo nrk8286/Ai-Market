@@ -1,7 +1,7 @@
 (async () => {
   console.log('\nRunning E2E script runner (direct worker invocation)...');
 
-  const workerModule = require('../worker.js');
+  const workerModule = await import('../worker.js');
   const worker = workerModule.default || workerModule;
 
   async function callEndpoint(path, method = 'GET', body = null, env = {}) {

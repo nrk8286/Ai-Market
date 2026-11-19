@@ -392,7 +392,10 @@ export default {
 
         // Marketplace Connect onboarding
         if (url.pathname.startsWith('/marketplace/connect/onboard')) {
-            return handleConnectOnboard(request, env);
+            return new Response(JSON.stringify({ error: 'Marketplace Connect onboarding is not implemented' }), {
+                status: 501,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
         // Gumroad checkout redirect endpoint
@@ -2096,8 +2099,13 @@ async function handleCheckout(request, env) {
 
         const body = await request.json();
         const itemId = body.itemId;
-        const item = _MARKETPLACE_ITEMS.find(i => i.id === itemId);
+        const store = await getProductStore();
+        const item = store.getById(itemId);
         if (!item) return new Response(JSON.stringify({ error: 'Item not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+
+        if (!env.STRIPE_SECRET_KEY && env.TEST_MODE !== '1') {
+            return new Response(JSON.stringify({ error: 'Payments are not configured' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+        }
 
         // Vendor marketplace checkout support
         const vendorId = body.vendorId || null;
@@ -2109,7 +2117,7 @@ async function handleCheckout(request, env) {
 
         // If Stripe configured, use StripeClient to create PaymentIntent with transfer to vendor
         const { default: StripeClient } = await import('./src/services/StripeClient.cjs');
-        const stripe = new StripeClient(env.STRIPE_SECRET_KEY || '');
+        const stripe = new StripeClient(env.TEST_MODE === '1' ? '' : (env.STRIPE_SECRET_KEY || ''));
 
         if (stripe.isAvailable()) {
             const pi = await stripe.createPaymentIntentForVendor({ amount, currency, vendorAccountId: vendorId, platformFee, description: `Purchase ${item.name}` });
