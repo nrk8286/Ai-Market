@@ -4,18 +4,13 @@
   "installCommand": "",
   "buildCommand": "",
   "outputDirectory": "public",
-  "headers": [
+  "routes": [
     {
-      "source": "/:path*",
-      "headers": [
-        { "key": "x-vercel-enable-rewrite-caching", "value": "0" }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "destination": "https://ai-market.nrk8286.workers.dev/:path*"
+      "src": "/(.*)",
+      "dest": "https://ai-market.nrk8286.workers.dev/$1",
+      "headers": {
+        "x-vercel-enable-rewrite-caching": "0"
+      }
     }
   ]
 }
