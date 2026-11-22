@@ -21,15 +21,21 @@ on:
 
 jobs:
   build:
-    if: ${{ secrets.DD_API_KEY && secrets.DD_APP_KEY }}
+    # Live synthetic checks run after a main-branch push, not during PR review.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
 
     steps:
     - uses: actions/checkout@v4
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
 
     # Run Synthetic tests within your GitHub workflow.
     # For additional configuration options visit the action within the marketplace: https://github.com/marketplace/actions/datadog-synthetics-ci
     - name: Run Datadog Synthetic tests
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       uses: DataDog/synthetics-ci-github-action@87b505388a22005bb8013481e3f73a367b9a53eb # v1.4.0
       with:
         api_key: ${{secrets.DD_API_KEY}}
@@ -37,36 +43,43 @@ jobs:
         test_search_query: 'tag:e2e-tests' #Modify this tag to suit your tagging strategy
 
     - name: Test AI Marketplace Home Page
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       run: |
         curl -f -s -o /dev/null https://searchenginepro.uk
         echo "Home page is accessible"
 
     - name: Test AI Marketplace Items API
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       run: |
         curl -f -s -o /dev/null https://searchenginepro.uk/marketplace/items
         echo "Marketplace items API is accessible"
 
     - name: Test AI Marketplace Buy API
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       run: |
         curl -f -s -o /dev/null https://searchenginepro.uk/marketplace/buy
         echo "Marketplace buy API is accessible"
 
     - name: Test AI Marketplace User Registration
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       run: |
         curl -f -s -o /dev/null https://searchenginepro.uk/api/register
         echo "User registration API is accessible"
 
     - name: Test AI Marketplace User Login
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       run: |
         curl -f -s -o /dev/null https://searchenginepro.uk/api/login
         echo "User login API is accessible"
 
     - name: Test AI Marketplace User Dashboard
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       run: |
         curl -f -s -o /dev/null https://searchenginepro.uk/dashboard
         echo "User dashboard is accessible"
 
     - name: Test AI Marketplace Upload Flow
+      if: env.DD_API_KEY != '' && env.DD_APP_KEY != ''
       run: |
         curl -f -s -o /dev/null https://searchenginepro.uk/upload
         echo "Upload flow is accessible"

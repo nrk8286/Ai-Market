@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "",
+  "outputDirectory": "public",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "https://ai-market.nrk8286.workers.dev/$1",
+      "headers": {
+        "x-vercel-enable-rewrite-caching": "0"
+      }
+    }
+  ]
+}
