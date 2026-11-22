@@ -79,7 +79,7 @@ console.log('Your website is ready at:', result.websiteUrl);
 - **Backend**: Node.js 20, Fastify (`fastify@^4.25.0`)
 - **Database & ORM**: Neon PostgreSQL / `pg` (`pg@^8.11.0`), Drizzle ORM (`drizzle-orm@^0.30.0`)
 - **Cache**: Redis (`redis@^4.6.15`)
-- **Hosting**: Vercel (serverless deployment)
+- **Hosting**: Cloudflare Workers runs the app and API. The linked Vercel project forwards requests to the existing `ai-market` Worker.
 - **Authentication**: Clerk (`@clerk/clerk-sdk-node@^4.0.0`)
 - **Analytics**: Plausible Analytics (privacy-focused)
 - **AI**: OpenAI (`openai@^6.16.0`), embeddings, vector DB

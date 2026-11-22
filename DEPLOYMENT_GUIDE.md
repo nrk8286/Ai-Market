@@ -28,6 +28,18 @@ npm start
 npm run deploy
 ```
 
+## Vercel routing
+
+The `create-react-app` Vercel project uses `vercel.json` to override its
+framework preset and forward requests to the existing
+`ai-market.nrk8286.workers.dev` Worker. The Worker serves the pages and API.
+Vercel skips the application build and disables caching for the external rewrite.
+Deploy the Worker using its existing Cloudflare workflow.
+
+Before promoting a Vercel preview, compare `GET /` and
+`GET /marketplace/items` with the Worker directly. Check that an unknown route
+retains the Worker's status and that protected routes still require authentication.
+
 ---
 
 ## 📋 Configuration
